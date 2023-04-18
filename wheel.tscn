@@ -1,0 +1,52 @@
+[gd_scene load_steps=6 format=3 uid="uid://b4tn0lks32rcn"]
+
+[ext_resource type="Script" path="res://wheel.gd" id="1_4gmrb"]
+[ext_resource type="ArrayMesh" uid="uid://bla3xvrue2lr8" path="res://wheelDefault.res" id="1_aaei5"]
+[ext_resource type="Script" path="res://debug_vector_overlay.gd" id="3_4ktfh"]
+
+[sub_resource type="Curve" id="Curve_51ssa"]
+_data = [Vector2(0, 0.3), 0.0, 4.90476, 0, 0, Vector2(1, 0.172727), 0.0279511, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_7iaof"]
+size = Vector3(0.1, 0.1, 0.1)
+
+[node name="wheel" type="Node3D"]
+script = ExtResource("1_4gmrb")
+max_steering_angle = 0.785398
+grip_curve = SubResource("Curve_51ssa")
+max_slip_angle = 0.436332
+spring_strength = 40.0
+spring_rest_length = 0.6
+damping = 0.5
+max_acceleration_force = 3.0
+
+[node name="hub" type="Node3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0)
+
+[node name="mesh" type="MeshInstance3D" parent="hub"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1.00004, 0, 0, 0, 1.00004, 0, 0, 0)
+mesh = ExtResource("1_aaei5")
+skeleton = NodePath("../../..")
+
+[node name="rotation_indicator_mesh" type="MeshInstance3D" parent="hub/mesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.248749, 0, 0)
+mesh = SubResource("BoxMesh_7iaof")
+
+[node name="debug_acceleration_force" type="Node3D" parent="hub"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
+script = ExtResource("3_4ktfh")
+color = Color(0, 0, 1, 1)
+
+[node name="debug_grip_force" type="Node3D" parent="hub"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
+script = ExtResource("3_4ktfh")
+color = Color(1, 0, 0, 1)
+
+[node name="debug_suspension_force" type="Node3D" parent="."]
+unique_name_in_owner = true
+script = ExtResource("3_4ktfh")
