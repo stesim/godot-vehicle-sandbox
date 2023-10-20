@@ -12,8 +12,13 @@ config_version=5
 
 config/name="vehicle-sandbox"
 run/main_scene="res://sandbox.tscn"
-config/features=PackedStringArray("4.0", "Forward Plus")
+config/features=PackedStringArray("4.1", "Forward Plus")
 config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
 
 [input]
 
