@@ -52,3 +52,8 @@ steer_right={
 [layer_names]
 
 3d_physics/layer_1="world"
+
+[physics]
+
+common/physics_ticks_per_second=128
+3d/physics_engine="JoltPhysics3D"
