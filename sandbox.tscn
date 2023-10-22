@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=58 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://texture_07.png" id="2_ew4ub"]
 [ext_resource type="Script" path="res://vehicle.gd" id="2_juwt1"]
@@ -19,6 +19,12 @@ size = Vector2(64, 64)
 [sub_resource type="BoxShape3D" id="BoxShape3D_av3ol"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_hatsg"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hc81o"]
+size = Vector3(3, 3, 3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_0oeik"]
+size = Vector3(3, 3, 3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3u1rk"]
 size = Vector3(1.87018, 0.769409, 4.46075)
@@ -422,8 +428,8 @@ max_value = 4.0
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.8, 1), 0.0, 0.0, 0, 0, Vector2(1, 4), 46.2876, 0.0, 0, 0]
 point_count = 3
 
-[sub_resource type="Curve" id="Curve_nxhd5"]
-_data = [Vector2(0, 0), 0.0, 3.95652, 0, 1, Vector2(0.252747, 1), 3.95652, 0.0, 1, 0]
+[sub_resource type="Curve" id="Curve_ibqg3"]
+_data = [Vector2(0, 0), 0.0, 4.0, 0, 1, Vector2(0.25, 1), 4.0, 0.0, 1, 0]
 point_count = 2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l63hl"]
@@ -568,7 +574,7 @@ shape = SubResource("BoxShape3D_qvu1f")
 mesh = SubResource("PlaneMesh_8tg30")
 
 [node name="obstacle" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.999969, -0.00783601, 0, 0.00783601, 0.999969, 2.46911, -0.392547, -4.50358)
+transform = Transform3D(1, 0, 0, 0, 0.999969, -0.00783601, 0, 0.00783601, 0.999969, 2.46911, -0.392547, 0.537218)
 
 [node name="shape" type="CollisionShape3D" parent="obstacle"]
 shape = SubResource("BoxShape3D_av3ol")
@@ -576,11 +582,65 @@ shape = SubResource("BoxShape3D_av3ol")
 [node name="mesh" type="MeshInstance3D" parent="obstacle"]
 mesh = SubResource("BoxMesh_hatsg")
 
+[node name="obstacle2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.999969, -0.00783601, 0, 0.00783601, 0.999969, 2.46911, -0.253075, -0.403599)
+
+[node name="shape" type="CollisionShape3D" parent="obstacle2"]
+shape = SubResource("BoxShape3D_av3ol")
+
+[node name="mesh" type="MeshInstance3D" parent="obstacle2"]
+mesh = SubResource("BoxMesh_hatsg")
+
+[node name="obstacle4" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.999969, -0.00783601, 0, 0.00783601, 0.999969, 4.0888, -0.392547, -1.08554)
+
+[node name="shape" type="CollisionShape3D" parent="obstacle4"]
+shape = SubResource("BoxShape3D_av3ol")
+
+[node name="mesh" type="MeshInstance3D" parent="obstacle4"]
+mesh = SubResource("BoxMesh_hatsg")
+
+[node name="obstacle5" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.999969, -0.00783601, 0, 0.00783601, 0.999969, 4.0888, -0.253075, -2.02636)
+
+[node name="shape" type="CollisionShape3D" parent="obstacle5"]
+shape = SubResource("BoxShape3D_av3ol")
+
+[node name="mesh" type="MeshInstance3D" parent="obstacle5"]
+mesh = SubResource("BoxMesh_hatsg")
+
+[node name="obstacle6" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.999969, -0.00783601, 0, 0.00783601, 0.999969, 2.49021, -0.392547, -2.18334)
+
+[node name="shape" type="CollisionShape3D" parent="obstacle6"]
+shape = SubResource("BoxShape3D_av3ol")
+
+[node name="mesh" type="MeshInstance3D" parent="obstacle6"]
+mesh = SubResource("BoxMesh_hatsg")
+
+[node name="obstacle7" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.999969, -0.00783601, 0, 0.00783601, 0.999969, 2.49021, -0.253075, -3.12416)
+
+[node name="shape" type="CollisionShape3D" parent="obstacle7"]
+shape = SubResource("BoxShape3D_av3ol")
+
+[node name="mesh" type="MeshInstance3D" parent="obstacle7"]
+mesh = SubResource("BoxMesh_hatsg")
+
+[node name="obstacle3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.94824, -0.317552, 0, 0.317552, 0.94824, -4.93805, -0.974477, -2.12251)
+
+[node name="shape" type="CollisionShape3D" parent="obstacle3"]
+shape = SubResource("BoxShape3D_hc81o")
+
+[node name="mesh" type="MeshInstance3D" parent="obstacle3"]
+mesh = SubResource("BoxMesh_0oeik")
+
 [node name="vehicle" type="RigidBody3D" parent="." node_paths=PackedStringArray("wheels")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 mass = 2500.0
 center_of_mass_mode = 1
-center_of_mass = Vector3(0, 0.25, 0)
+center_of_mass = Vector3(0, 0.2, 0)
 can_sleep = false
 script = ExtResource("2_juwt1")
 wheels = [NodePath("wheel_fl"), NodePath("wheel_fr"), NodePath("wheel_rl"), NodePath("wheel_rr")]
@@ -643,8 +703,12 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, -1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
+rest_length = 0.25
 stiffness_curve = SubResource("Curve_ihhsw")
-traction_curve = SubResource("Curve_nxhd5")
+longitudinal_traction_curve = SubResource("Curve_ibqg3")
+lateral_traction_curve = SubResource("Curve_ibqg3")
+is_driven = true
+is_steering = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_fl"]
 transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, 0, 0, 0)
@@ -665,8 +729,12 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, -1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
+rest_length = 0.25
 stiffness_curve = SubResource("Curve_ihhsw")
-traction_curve = SubResource("Curve_nxhd5")
+longitudinal_traction_curve = SubResource("Curve_ibqg3")
+lateral_traction_curve = SubResource("Curve_ibqg3")
+is_driven = true
+is_steering = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_fr"]
 transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0, 0, 0)
@@ -687,8 +755,10 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, 1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
+rest_length = 0.25
 stiffness_curve = SubResource("Curve_ihhsw")
-traction_curve = SubResource("Curve_nxhd5")
+longitudinal_traction_curve = SubResource("Curve_ibqg3")
+lateral_traction_curve = SubResource("Curve_ibqg3")
 is_driven = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_rl"]
@@ -710,8 +780,10 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, 1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
+rest_length = 0.25
 stiffness_curve = SubResource("Curve_ihhsw")
-traction_curve = SubResource("Curve_nxhd5")
+longitudinal_traction_curve = SubResource("Curve_ibqg3")
+lateral_traction_curve = SubResource("Curve_ibqg3")
 is_driven = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_rr"]

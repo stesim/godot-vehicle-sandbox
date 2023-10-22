@@ -20,13 +20,23 @@ extends RayCast3D
 
 @export_subgroup("Tire")
 
-@export var traction_curve : Curve
+@export var peak_longitudinal_slip := 0.25
+
+@export var peak_lateral_slip := 0.25
+
+@export var longitudinal_traction_curve : Curve
+
+@export var lateral_traction_curve : Curve
 
 @export_subgroup("Input")
 
 @export var is_driven := false
 
 @export var drive_torque := 0.0
+
+@export var is_steering := false
+
+@export var steering_angle := 0.0
 
 
 
@@ -90,31 +100,66 @@ func apply_bottom_out_impulse(vehicle_state : PhysicsDirectBodyState3D, virtual_
 
 func apply_inputs(delta : float) -> void:
 	_angular_velocity += delta * drive_torque / inertia
+	rotation.y = steering_angle
 
 
-func apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D) -> void:
+func apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
 	if not is_colliding():
 		return
 
-	var forward := get_collision_normal().cross(global_transform.basis.x).normalized()
-	var rotation_velocity := radius * _angular_velocity * forward
-	var relative_velocity := rotation_velocity - _contact_velocity
-	var slip := relative_velocity.dot(forward)
+	var contact_normal := get_collision_normal()
+	var forward := contact_normal.cross(global_transform.basis.x).normalized()
+	var right := forward.cross(contact_normal).normalized()
+
+	var slip := _calculate_slip(forward, right)
 
 	var tire_load := _suspension_force
-	var traction_friction := signf(slip) * traction_curve.sample_baked(absf(slip))
-	var traction_torque := traction_friction * tire_load * radius
+	var grip := _calculate_grip(slip)
+
+	var traction_torque := tire_load * grip.x * radius
 
 	# NOTE: clamp traction so that it doesn't change the slip direction
-	var traction_torque_limit := inertia * slip / (radius * vehicle_state.step)
+	var traction_torque_limit := inertia * slip.x / (radius * vehicle_state.step)
 	if traction_torque / traction_torque_limit > 1.0:
 		traction_torque = traction_torque_limit
 
 	_angular_velocity -= vehicle_state.step * traction_torque / inertia
 
-	var traction_force := traction_torque / radius
+	var longitudinal_traction_force := traction_torque / radius
+
+	var lateral_traction_force_limit := virtual_mass * slip.y / vehicle_state.step
+	var lateral_traction_force := tire_load * grip.y
+	if lateral_traction_force / lateral_traction_force_limit > 1.0:
+		lateral_traction_force = lateral_traction_force_limit
+
+	var combined_traction_force := longitudinal_traction_force * forward + lateral_traction_force * right
 	var force_position := get_collision_point() - vehicle_state.transform.origin
-	vehicle_state.apply_force(traction_force * forward, force_position)
+	vehicle_state.apply_force(combined_traction_force, force_position)
+
+
+func _calculate_slip(forward : Vector3, right : Vector3) -> Vector2:
+	var rotation_velocity := radius * _angular_velocity * forward
+	var relative_velocity := rotation_velocity - _contact_velocity
+	var slip := Vector2(
+		relative_velocity.dot(forward),
+		relative_velocity.dot(right)
+	)
+	return slip
+
+
+func _calculate_grip(slip : Vector2) -> Vector2:
+	var normalized_slip := Vector2(
+		slip.x / peak_longitudinal_slip,
+		slip.y / peak_lateral_slip
+	)
+	if normalized_slip.is_zero_approx():
+		return Vector2.ZERO
+	var length := normalized_slip.length()
+	var grip := Vector2(
+		normalized_slip.x / length * longitudinal_traction_curve.sample_baked(length * peak_longitudinal_slip),
+		normalized_slip.y / length * lateral_traction_curve.sample_baked(length * peak_lateral_slip)
+	)
+	return grip
 
 
 func _physics_process(delta : float) -> void:
