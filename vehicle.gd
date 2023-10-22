@@ -6,23 +6,16 @@ extends RigidBody3D
 
 
 func _integrate_forces(state : PhysicsDirectBodyState3D) -> void:
+	_apply_suspension_forces(state)
+
+
+func _apply_suspension_forces(state : PhysicsDirectBodyState3D) -> void:
 	for wheel in wheels:
-		_apply_suspension_force(state, wheel)
+		wheel.apply_suspension_force(state)
 
-
-func _apply_suspension_force(state : PhysicsDirectBodyState3D, wheel : Wheel) -> void:
-	if not wheel.is_colliding():
-		return
-
-	var up := wheel.global_transform.basis.y
-	var contact_point := wheel.get_collision_point()
-	var contact_distance := (wheel.global_position - contact_point).dot(up)
-	var spring_displacement := contact_distance - (wheel.rest_length + wheel.radius)
-	# NOTE: assumes the ground/collider is stationary
-	var displacement_velocity := state.get_velocity_at_local_position(contact_point).dot(up)
-
-	var force_magnitude := -wheel.stiffness * spring_displacement - wheel.damping * displacement_velocity
-
-	var force := force_magnitude * up
-	var force_position := contact_point - global_position
-	state.apply_force(force, force_position)
+	for wheel in wheels:
+		if wheel.is_bottoming_out():
+			# NOTE: assumes uniform mass distribution, but appears to work reasonably well
+			# TODO: more accurate solution?
+			var virtual_mass = mass / wheels.size()
+			wheel.apply_bottom_out_impulse(state, virtual_mass)
