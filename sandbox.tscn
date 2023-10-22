@@ -1,4 +1,4 @@
-[gd_scene load_steps=55 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=56 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://texture_07.png" id="2_ew4ub"]
 [ext_resource type="Script" path="res://vehicle.gd" id="2_juwt1"]
@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cb5g8miqmixlq" path="res://assets/mercedes_g_class/mercedes_benz_g-class_w263_0.png" id="3_r3m2b"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qvu1f"]
-size = Vector3(32, 1, 32)
+size = Vector3(64, 1, 64)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gdeoi"]
 albedo_texture = ExtResource("2_ew4ub")
@@ -14,7 +14,7 @@ uv1_triplanar = true
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_8tg30"]
 material = SubResource("StandardMaterial3D_gdeoi")
-size = Vector2(32, 32)
+size = Vector2(64, 64)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_av3ol"]
 
@@ -418,9 +418,13 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_pdbvp")
 
 [sub_resource type="Curve" id="Curve_ihhsw"]
-max_value = 5.0
-_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.8, 1), 0.0, 0.0, 0, 0, Vector2(1, 5), 60.1285, 0.0, 0, 0]
+max_value = 4.0
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.8, 1), 0.0, 0.0, 0, 0, Vector2(1, 4), 46.2876, 0.0, 0, 0]
 point_count = 3
+
+[sub_resource type="Curve" id="Curve_nxhd5"]
+_data = [Vector2(0, 0), 0.0, 3.95652, 0, 1, Vector2(0.252747, 1), 3.95652, 0.0, 1, 0]
+point_count = 2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l63hl"]
 resource_name = "Material.006"
@@ -554,7 +558,7 @@ glow_enabled = true
 [node name="sandbox" type="Node3D"]
 
 [node name="ground" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.999999, 0, 0, 0)
 
 [node name="shape" type="CollisionShape3D" parent="ground"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
@@ -564,7 +568,7 @@ shape = SubResource("BoxShape3D_qvu1f")
 mesh = SubResource("PlaneMesh_8tg30")
 
 [node name="obstacle" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.999969, -0.00783601, 0, 0.00783601, 0.999969, 1.80877, -0.459482, -0.0381579)
+transform = Transform3D(1, 0, 0, 0, 0.999969, -0.00783601, 0, 0.00783601, 0.999969, 2.46911, -0.392547, -4.50358)
 
 [node name="shape" type="CollisionShape3D" parent="obstacle"]
 shape = SubResource("BoxShape3D_av3ol")
@@ -639,10 +643,8 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, -1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
-radius = 0.4
-stiffness = 40000.0
 stiffness_curve = SubResource("Curve_ihhsw")
-damping = 4000.0
+traction_curve = SubResource("Curve_nxhd5")
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_fl"]
 transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, 0, 0, 0)
@@ -663,10 +665,8 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, -1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
-radius = 0.4
-stiffness = 40000.0
 stiffness_curve = SubResource("Curve_ihhsw")
-damping = 4000.0
+traction_curve = SubResource("Curve_nxhd5")
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_fr"]
 transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0, 0, 0)
@@ -687,10 +687,9 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, 1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
-radius = 0.4
-stiffness = 40000.0
 stiffness_curve = SubResource("Curve_ihhsw")
-damping = 4000.0
+traction_curve = SubResource("Curve_nxhd5")
+is_driven = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_rl"]
 transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, 0, 0, 0)
@@ -711,10 +710,9 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, 1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
-radius = 0.4
-stiffness = 40000.0
 stiffness_curve = SubResource("Curve_ihhsw")
-damping = 4000.0
+traction_curve = SubResource("Curve_nxhd5")
+is_driven = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_rr"]
 transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0, 0, 0)
