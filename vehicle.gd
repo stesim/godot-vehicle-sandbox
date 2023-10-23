@@ -2,7 +2,9 @@ class_name Vehicle
 extends RigidBody3D
 
 
-@export var max_engine_torque := 4.0 * 3.0 * 500.0
+@export var max_engine_torque := 500.0
+
+@export var gear_ratio := 12.0
 
 @export var max_steering_angle := deg_to_rad(30.0)
 
@@ -16,6 +18,10 @@ extends RigidBody3D
 
 @export var input_speed := 6.0
 
+@export var motor_audio_controller : MotorAudioController
+
+@export var wheel_audio_controller : TireAudioController
+
 
 var _engine_input := 0.0
 
@@ -26,6 +32,7 @@ var _brake_input := 0.0
 
 func _process(delta : float) -> void:
 	_update_inputs(delta)
+	_update_audio()
 
 
 func _integrate_forces(state : PhysicsDirectBodyState3D) -> void:
@@ -91,7 +98,7 @@ func _apply_drive_input() -> void:
 			var auto_brake_torque := absf(_engine_input) * max_brake_torque
 			brake_torque = maxf(brake_torque, auto_brake_torque)
 		else:
-			engine_torque = _engine_input * max_engine_torque
+			engine_torque = _engine_input * max_engine_torque * gear_ratio
 
 	var wheel_torque := engine_torque / num_driven_wheels if num_driven_wheels > 0 else 0.0
 	for wheel in wheels:
@@ -130,3 +137,38 @@ func _calculate_turn_center() -> Vector3:
 			num_non_steering_wheels += 1
 	turn_center /= num_non_steering_wheels
 	return turn_center
+
+
+func _update_audio() -> void:
+	_update_motor_audio()
+	_update_wheel_audio()
+
+
+func _update_motor_audio() -> void:
+	if motor_audio_controller == null:
+		return
+
+	var wheel_angular_velocity := INF
+	for wheel in wheels:
+		if wheel.is_driven:
+			wheel_angular_velocity = minf(
+				wheel_angular_velocity,
+				absf(wheel.get_angular_velocity())
+			)
+
+	var wheel_rpm := _angular_velocity_to_rpm(wheel_angular_velocity)
+	var motor_rpm := gear_ratio * wheel_rpm
+	# HACK: artificial clamp on rpm until proper motor simulation takes over
+	motor_audio_controller.rpm = clampf(motor_rpm, 300.0, 6000.0)
+
+
+func _update_wheel_audio() -> void:
+	var slip := 0.0
+	for wheel in wheels:
+		slip += wheel.get_slip_velocity().length()
+	slip /= wheels.size()
+	wheel_audio_controller.slip = slip
+
+
+func _angular_velocity_to_rpm(velocity : float) -> float:
+	return 60.0 * velocity / TAU

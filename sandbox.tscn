@@ -1,10 +1,14 @@
-[gd_scene load_steps=59 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=65 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://texture_07.png" id="2_ew4ub"]
 [ext_resource type="Script" path="res://vehicle.gd" id="2_juwt1"]
 [ext_resource type="Script" path="res://wheel.gd" id="2_yic85"]
 [ext_resource type="Texture2D" uid="uid://cb5g8miqmixlq" path="res://assets/mercedes_g_class/mercedes_benz_g-class_w263_0.png" id="3_r3m2b"]
+[ext_resource type="Script" path="res://motor_audio_controller.gd" id="5_3q0g4"]
+[ext_resource type="Script" path="res://tire_audio_controller.gd" id="5_d2c43"]
+[ext_resource type="AudioStream" uid="uid://bt4wa6p377qf6" path="res://assets/sounds/tires_squal_loop.wav" id="5_l7lxq"]
 [ext_resource type="Script" path="res://camera.gd" id="5_no0k6"]
+[ext_resource type="AudioStream" uid="uid://cc0jrsvptngww" path="res://assets/sounds/motor-loop-2-103532.wav" id="6_cnggs"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qvu1f"]
 size = Vector3(64, 1, 64)
@@ -549,6 +553,14 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_0cndc")
 
+[sub_resource type="Curve" id="Curve_ajux4"]
+_data = [Vector2(0, 0), 0.0, 0.0409135, 0, 0, Vector2(1, 1), 0.240248, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_mtbea"]
+_data = [Vector2(0, 0), 0.16681, 0.173796, 0, 0, Vector2(1, 1), 1.87193, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_lmsou"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
 ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -646,7 +658,7 @@ shape = SubResource("BoxShape3D_hc81o")
 [node name="mesh" type="MeshInstance3D" parent="obstacle8"]
 mesh = SubResource("BoxMesh_0oeik")
 
-[node name="vehicle" type="RigidBody3D" parent="." node_paths=PackedStringArray("wheels")]
+[node name="vehicle" type="RigidBody3D" parent="." node_paths=PackedStringArray("wheels", "motor_audio_controller", "wheel_audio_controller")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 mass = 2500.0
 center_of_mass_mode = 1
@@ -654,6 +666,8 @@ center_of_mass = Vector3(0, 0.2, 0)
 can_sleep = false
 script = ExtResource("2_juwt1")
 wheels = [NodePath("wheel_fl"), NodePath("wheel_fr"), NodePath("wheel_rl"), NodePath("wheel_rr")]
+motor_audio_controller = NodePath("motor_audio_controller")
+wheel_audio_controller = NodePath("slide_sound/controller")
 
 [node name="shape_1" type="CollisionShape3D" parent="vehicle"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.522, 0)
@@ -812,6 +826,32 @@ skeleton = NodePath("")
 [node name="Object_17" type="MeshInstance3D" parent="vehicle/wheel_rr/visuals"]
 mesh = SubResource("ArrayMesh_r5qm2")
 skeleton = NodePath("")
+
+[node name="motor_sound" type="AudioStreamPlayer3D" parent="vehicle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.483242, -1.46505)
+stream = ExtResource("6_cnggs")
+
+[node name="motor_audio_controller" type="Node" parent="vehicle" node_paths=PackedStringArray("drive_loop")]
+script = ExtResource("5_3q0g4")
+baseline_rpm = 1000.0
+pitch_scale = 2400.0
+drive_loop = NodePath("../motor_sound")
+
+[node name="slide_sound" type="AudioStreamPlayer3D" parent="vehicle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
+stream = ExtResource("5_l7lxq")
+attenuation_model = 1
+
+[node name="controller" type="Node" parent="vehicle/slide_sound" node_paths=PackedStringArray("slide_loop")]
+script = ExtResource("5_d2c43")
+slide_loop = NodePath("..")
+slip_max = 64.0
+slip_pitch_min = 0.8
+slip_pitch_max = 1.0
+slip_pitch_curve = SubResource("Curve_ajux4")
+slip_volume_min = 0.25
+slip_volume_max = 1.0
+slip_volume_curve = SubResource("Curve_mtbea")
 
 [node name="camera" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
 transform = Transform3D(0.017569, -0.354237, 0.934991, 0, 0.935135, 0.354292, -0.999846, -0.00622455, 0.0164294, 7.85633, 2.67388, -3.95224)

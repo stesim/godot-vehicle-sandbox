@@ -122,6 +122,8 @@ func apply_drive_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass :
 		_apply_tire_forces(vehicle_state, virtual_mass)
 		var traction_brake_torque := -signf(_angular_velocity) * brake_torque - applied_brake_torque
 		applied_brake_torque += _apply_brake_torque(traction_brake_torque, vehicle_state.step)
+	else:
+		_slip = Vector2.ZERO
 
 
 func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
@@ -145,6 +147,8 @@ func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass :
 	vehicle_state.apply_force(traction_force, force_position)
 
 	_apply_traction_feedback(vehicle_state, _slip.x, virtual_mass, forward, longitudinal_traction_force)
+
+	_slip = _calculate_slip(forward, right)
 
 
 func _apply_traction_feedback(vehicle_state : PhysicsDirectBodyState3D, slip : float, virtual_mass : float, forward : Vector3, traction_force : float) -> void:
