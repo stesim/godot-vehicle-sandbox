@@ -1,0 +1,53 @@
+[gd_scene load_steps=9 format=3 uid="uid://dwe133wihy5oc"]
+
+[ext_resource type="Texture2D" uid="uid://v8xvuial75ue" path="res://assets/textures/smoke_07.png" id="1_7mxc0"]
+
+[sub_resource type="Gradient" id="Gradient_7kkp6"]
+offsets = PackedFloat32Array(0, 0.79085, 1)
+colors = PackedColorArray(0.304688, 0.304688, 0.304688, 1, 0.477124, 0.477124, 0.477124, 0.522876, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_veaja"]
+gradient = SubResource("Gradient_7kkp6")
+
+[sub_resource type="Curve" id="Curve_4bmdy"]
+_data = [Vector2(0, 0.252632), 0.0, 0.0, 0, 0, Vector2(1, 1), 1.69474, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_ejucf"]
+curve = SubResource("Curve_4bmdy")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_eot6y"]
+direction = Vector3(0, 1, 0)
+spread = 15.0
+gravity = Vector3(0, 0, 0)
+initial_velocity_min = 0.75
+initial_velocity_max = 1.25
+damping_min = 0.2
+damping_max = 0.25
+angle_max = 360.0
+scale_min = 1.5
+scale_max = 4.0
+scale_curve = SubResource("CurveTexture_ejucf")
+color = Color(0.364706, 0.364706, 0.364706, 0.501961)
+color_ramp = SubResource("GradientTexture1D_veaja")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xsal0"]
+transparency = 1
+shading_mode = 0
+vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("1_7mxc0")
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_a8o0x"]
+material = SubResource("StandardMaterial3D_xsal0")
+
+[node name="smoke_particles" type="GPUParticles3D"]
+emitting = false
+amount = 64
+lifetime = 2.0
+process_material = SubResource("ParticleProcessMaterial_eot6y")
+draw_pass_1 = SubResource("QuadMesh_a8o0x")

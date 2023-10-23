@@ -1,4 +1,4 @@
-[gd_scene load_steps=68 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=70 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Script" path="res://sandbox.gd" id="1_nf78t"]
 [ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://texture_07.png" id="2_ew4ub"]
@@ -9,7 +9,9 @@
 [ext_resource type="Script" path="res://tire_audio_controller.gd" id="5_d2c43"]
 [ext_resource type="AudioStream" uid="uid://bt4wa6p377qf6" path="res://assets/sounds/tires_squal_loop.wav" id="5_l7lxq"]
 [ext_resource type="Script" path="res://camera.gd" id="5_no0k6"]
+[ext_resource type="PackedScene" uid="uid://dwe133wihy5oc" path="res://smoke_particles.tscn" id="6_02ux7"]
 [ext_resource type="AudioStream" uid="uid://cc0jrsvptngww" path="res://assets/sounds/motor-loop-2-103532.wav" id="6_cnggs"]
+[ext_resource type="Script" path="res://skid_smoke_controller.gd" id="7_5wx1i"]
 [ext_resource type="Script" path="res://camera_arm.gd" id="10_2ofnf"]
 [ext_resource type="Script" path="res://camera_crane.gd" id="10_w6w1k"]
 
@@ -755,6 +757,13 @@ skeleton = NodePath("")
 mesh = SubResource("ArrayMesh_r5qm2")
 skeleton = NodePath("")
 
+[node name="smoke_particles" parent="vehicle/wheel_fl" instance=ExtResource("6_02ux7")]
+
+[node name="controller" type="Node" parent="vehicle/wheel_fl/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
+script = ExtResource("7_5wx1i")
+wheel = NodePath("../..")
+smoke = NodePath("..")
+
 [node name="wheel_fr" type="RayCast3D" parent="vehicle" node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, -1.45)
 script = ExtResource("2_yic85")
@@ -780,6 +789,13 @@ skeleton = NodePath("")
 [node name="Object_17" type="MeshInstance3D" parent="vehicle/wheel_fr/visuals"]
 mesh = SubResource("ArrayMesh_r5qm2")
 skeleton = NodePath("")
+
+[node name="smoke_particles" parent="vehicle/wheel_fr" instance=ExtResource("6_02ux7")]
+
+[node name="controller" type="Node" parent="vehicle/wheel_fr/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
+script = ExtResource("7_5wx1i")
+wheel = NodePath("../..")
+smoke = NodePath("..")
 
 [node name="wheel_rl" type="RayCast3D" parent="vehicle" node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, 1.45)
@@ -807,6 +823,13 @@ skeleton = NodePath("")
 mesh = SubResource("ArrayMesh_r5qm2")
 skeleton = NodePath("")
 
+[node name="smoke_particles" parent="vehicle/wheel_rl" instance=ExtResource("6_02ux7")]
+
+[node name="controller" type="Node" parent="vehicle/wheel_rl/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
+script = ExtResource("7_5wx1i")
+wheel = NodePath("../..")
+smoke = NodePath("..")
+
 [node name="wheel_rr" type="RayCast3D" parent="vehicle" node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, 1.45)
 script = ExtResource("2_yic85")
@@ -832,6 +855,13 @@ skeleton = NodePath("")
 [node name="Object_17" type="MeshInstance3D" parent="vehicle/wheel_rr/visuals"]
 mesh = SubResource("ArrayMesh_r5qm2")
 skeleton = NodePath("")
+
+[node name="smoke_particles" parent="vehicle/wheel_rr" instance=ExtResource("6_02ux7")]
+
+[node name="controller" type="Node" parent="vehicle/wheel_rr/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
+script = ExtResource("7_5wx1i")
+wheel = NodePath("../..")
+smoke = NodePath("..")
 
 [node name="motor_sound" type="AudioStreamPlayer3D" parent="vehicle"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.483242, -1.46505)
