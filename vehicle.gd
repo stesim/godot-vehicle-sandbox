@@ -6,6 +6,10 @@ extends RigidBody3D
 
 @export var max_steering_angle := deg_to_rad(30.0)
 
+@export var max_brake_torque := 4000.0
+
+@export var auto_brake_threshold := 0.1
+
 @export var wheels : Array[Wheel] = []
 
 @export var input_speed := 6.0
@@ -15,13 +19,14 @@ var _engine_input := 0.0
 
 var _steering_input := 0.0
 
+var _brake_input := 0.0
+
 
 func _process(delta : float) -> void:
 	_update_inputs(delta)
 
 
 func _integrate_forces(state : PhysicsDirectBodyState3D) -> void:
-	_apply_wheel_inputs(state.step)
 	_apply_suspension_forces(state)
 	_apply_tire_forces(state)
 
@@ -46,25 +51,45 @@ func _apply_suspension_forces(state : PhysicsDirectBodyState3D) -> void:
 func _apply_tire_forces(state : PhysicsDirectBodyState3D) -> void:
 	for wheel in wheels:
 		var virtual_mass := mass / wheels.size()
-		wheel.apply_tire_forces(state, virtual_mass)
+		wheel.apply_drive_forces(state, virtual_mass)
 
 
 func _update_inputs(delta : float) -> void:
-	_engine_input = move_toward(_engine_input, Input.get_axis(&"brake", &"accelerate"), delta * input_speed)
-	var engine_torque := _engine_input * max_engine_torque
-
-	var num_driven_wheels := 0
-	for wheel in wheels:
-		if wheel.is_driven:
-			num_driven_wheels += 1
-
-	for wheel in wheels:
-		if wheel.is_driven:
-			var wheel_torque := engine_torque / num_driven_wheels
-			wheel.drive_torque = wheel_torque
-
+	_engine_input = move_toward(_engine_input, Input.get_axis(&"reverse", &"accelerate"), delta * input_speed)
+	_brake_input = move_toward(_brake_input, Input.get_action_strength(&"brake"), delta * input_speed)
 	_steering_input = move_toward(_steering_input, Input.get_axis(&"steer_right", &"steer_left"), delta * input_speed)
+
+	_apply_drive_input()
 	_apply_steering_input()
+
+
+func _apply_drive_input() -> void:
+	var engine_torque := 0.0
+	var num_driven_wheels := 0
+	var brake_torque := _brake_input * max_brake_torque
+
+	if not is_zero_approx(_engine_input):
+		var average_angular_velocity := 0.0
+		for wheel in wheels:
+			if wheel.is_driven:
+				num_driven_wheels += 1
+				average_angular_velocity += wheel.get_angular_velocity()
+		average_angular_velocity /= num_driven_wheels
+
+		var should_brake := (
+			absf(average_angular_velocity) > auto_brake_threshold
+			and signf(_engine_input) != signf(average_angular_velocity)
+		)
+		if should_brake:
+			brake_torque = absf(_engine_input) * max_brake_torque
+		else:
+			engine_torque = _engine_input * max_engine_torque
+
+	var wheel_torque := engine_torque / num_driven_wheels if num_driven_wheels > 0 else 0.0
+	for wheel in wheels:
+		wheel.brake_torque = brake_torque
+		if wheel.is_driven:
+			wheel.drive_torque = wheel_torque
 
 
 func _apply_steering_input() -> void:

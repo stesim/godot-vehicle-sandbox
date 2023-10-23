@@ -1,9 +1,10 @@
-[gd_scene load_steps=58 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=59 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://texture_07.png" id="2_ew4ub"]
 [ext_resource type="Script" path="res://vehicle.gd" id="2_juwt1"]
 [ext_resource type="Script" path="res://wheel.gd" id="2_yic85"]
 [ext_resource type="Texture2D" uid="uid://cb5g8miqmixlq" path="res://assets/mercedes_g_class/mercedes_benz_g-class_w263_0.png" id="3_r3m2b"]
+[ext_resource type="Script" path="res://camera.gd" id="5_no0k6"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qvu1f"]
 size = Vector3(64, 1, 64)
@@ -21,10 +22,10 @@ size = Vector2(64, 64)
 [sub_resource type="BoxMesh" id="BoxMesh_hatsg"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_hc81o"]
-size = Vector3(3, 3, 3)
+size = Vector3(8, 8, 8)
 
 [sub_resource type="BoxMesh" id="BoxMesh_0oeik"]
-size = Vector3(3, 3, 3)
+size = Vector3(8, 8, 8)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3u1rk"]
 size = Vector3(1.87018, 0.769409, 4.46075)
@@ -628,7 +629,7 @@ shape = SubResource("BoxShape3D_av3ol")
 mesh = SubResource("BoxMesh_hatsg")
 
 [node name="obstacle3" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.94824, -0.317552, 0, 0.317552, 0.94824, -4.93805, -0.974477, -2.12251)
+transform = Transform3D(1, 0, 0, 0, 0.94824, -0.317552, 0, 0.317552, 0.94824, -1.42615, -2.5619, -12.9571)
 
 [node name="shape" type="CollisionShape3D" parent="obstacle3"]
 shape = SubResource("BoxShape3D_hc81o")
@@ -801,8 +802,10 @@ skeleton = NodePath("")
 mesh = SubResource("ArrayMesh_r5qm2")
 skeleton = NodePath("")
 
-[node name="camera" type="Camera3D" parent="."]
-transform = Transform3D(0.017569, -0.354237, 0.93499, 0, 0.935135, 0.354292, -0.999846, -0.00622456, 0.0164294, 7.85633, 3.06414, -0.301363)
+[node name="camera" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
+transform = Transform3D(0.017569, -0.354237, 0.934991, 0, 0.935135, 0.354292, -0.999846, -0.00622455, 0.0164294, 7.85633, 2.67388, -3.95224)
+script = ExtResource("5_no0k6")
+target = NodePath("../vehicle")
 
 [node name="environment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_p1wvc")
