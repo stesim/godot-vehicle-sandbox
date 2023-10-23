@@ -54,6 +54,8 @@ var _contact_velocity := Vector3.ZERO
 
 var _angular_velocity := 0.0
 
+var _slip := Vector2.ZERO
+
 
 func _ready() -> void:
 	var total_length := rest_length + radius
@@ -70,6 +72,10 @@ func is_bottoming_out() -> bool:
 
 func get_angular_velocity() -> float:
 	return _angular_velocity
+
+
+func get_slip_velocity() -> Vector2:
+	return _slip
 
 
 func apply_suspension_force(vehicle_state : PhysicsDirectBodyState3D) -> void:
@@ -108,10 +114,12 @@ func apply_bottom_out_impulse(vehicle_state : PhysicsDirectBodyState3D, virtual_
 
 func apply_drive_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
 	_angular_velocity += vehicle_state.step * drive_torque / inertia
-	_apply_brake_torque(-signf(_angular_velocity) * brake_torque, vehicle_state.step)
+	var applied_brake_torque := _apply_brake_torque(-signf(_angular_velocity) * brake_torque, vehicle_state.step)
 
 	if is_colliding():
 		_apply_tire_forces(vehicle_state, virtual_mass)
+		var traction_brake_torque := -signf(_angular_velocity) * brake_torque - applied_brake_torque
+		applied_brake_torque += _apply_brake_torque(traction_brake_torque, vehicle_state.step)
 
 
 func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
@@ -119,8 +127,8 @@ func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass :
 	var forward := contact_normal.cross(global_transform.basis.x).normalized()
 	var right := forward.cross(contact_normal).normalized()
 
-	var slip := _calculate_slip(forward, right)
-	var grip := _calculate_grip(slip)
+	_slip = _calculate_slip(forward, right)
+	var grip := _calculate_grip(_slip)
 
 	var tire_load := _suspension_force
 	var longitudinal_traction_force := tire_load * grip.x
@@ -134,7 +142,7 @@ func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass :
 	var force_position := get_collision_point() - vehicle_state.transform.origin
 	vehicle_state.apply_force(traction_force, force_position)
 
-	_apply_traction_feedback(vehicle_state, slip.x, virtual_mass, forward, longitudinal_traction_force)
+	_apply_traction_feedback(vehicle_state, _slip.x, virtual_mass, forward, longitudinal_traction_force)
 
 
 func _apply_traction_feedback(vehicle_state : PhysicsDirectBodyState3D, slip : float, virtual_mass : float, forward : Vector3, traction_force : float) -> void:
@@ -154,6 +162,8 @@ func _apply_traction_feedback(vehicle_state : PhysicsDirectBodyState3D, slip : f
 
 
 func _apply_brake_torque(torque : float, delta : float) -> float:
+	if is_zero_approx(_angular_velocity):
+		return 0.0
 	var brake_torque_limit := -_angular_velocity * inertia / delta
 	if torque / brake_torque_limit > 1.0:
 		torque = brake_torque_limit

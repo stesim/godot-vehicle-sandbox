@@ -69,19 +69,23 @@ func _apply_drive_input() -> void:
 	var brake_torque := _brake_input * max_brake_torque
 
 	if not is_zero_approx(_engine_input):
-		var average_angular_velocity := 0.0
+		var average_velocity := 0.0
+		var average_slip := 0.0
 		for wheel in wheels:
 			if wheel.is_driven:
 				num_driven_wheels += 1
-				average_angular_velocity += wheel.get_angular_velocity()
-		average_angular_velocity /= num_driven_wheels
+				average_velocity += wheel.get_angular_velocity() * wheel.radius
+				average_slip += wheel.get_slip_velocity().x
+		average_velocity /= num_driven_wheels
+		average_slip /= num_driven_wheels
 
 		var should_brake := (
-			absf(average_angular_velocity) > auto_brake_threshold
-			and signf(_engine_input) != signf(average_angular_velocity)
+			-average_velocity * signf(_engine_input) > auto_brake_threshold
+			or is_zero_approx(average_velocity) and average_slip * signf(_engine_input) > auto_brake_threshold
 		)
+
 		if should_brake:
-			brake_torque = absf(_engine_input) * max_brake_torque
+			brake_torque = maxf(brake_torque, absf(_engine_input) * max_brake_torque)
 		else:
 			engine_torque = _engine_input * max_engine_torque
 
