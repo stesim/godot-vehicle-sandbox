@@ -44,6 +44,8 @@ extends RayCast3D
 
 @export var brake_torque := 0.0
 
+@export var has_handbrake := false
+
 
 
 var _spring_displacement := 0.0

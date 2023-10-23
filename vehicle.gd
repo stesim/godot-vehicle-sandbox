@@ -8,7 +8,9 @@ extends RigidBody3D
 
 @export var max_brake_torque := 4000.0
 
-@export var auto_brake_threshold := 0.1
+@export var max_handbrake_torque := 1550.0
+
+@export var auto_brake_threshold := 0.25
 
 @export var wheels : Array[Wheel] = []
 
@@ -66,7 +68,8 @@ func _update_inputs(delta : float) -> void:
 func _apply_drive_input() -> void:
 	var engine_torque := 0.0
 	var num_driven_wheels := 0
-	var brake_torque := _brake_input * max_brake_torque
+	var brake_torque := 0.0
+	var handbrake_torque := _brake_input * max_handbrake_torque
 
 	if not is_zero_approx(_engine_input):
 		var average_velocity := 0.0
@@ -85,13 +88,14 @@ func _apply_drive_input() -> void:
 		)
 
 		if should_brake:
-			brake_torque = maxf(brake_torque, absf(_engine_input) * max_brake_torque)
+			var auto_brake_torque := absf(_engine_input) * max_brake_torque
+			brake_torque = maxf(brake_torque, auto_brake_torque)
 		else:
 			engine_torque = _engine_input * max_engine_torque
 
 	var wheel_torque := engine_torque / num_driven_wheels if num_driven_wheels > 0 else 0.0
 	for wheel in wheels:
-		wheel.brake_torque = brake_torque
+		wheel.brake_torque = maxf(brake_torque, handbrake_torque) if wheel.has_handbrake else brake_torque
 		if wheel.is_driven:
 			wheel.drive_torque = wheel_torque
 

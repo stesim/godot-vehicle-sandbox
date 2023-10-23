@@ -637,6 +637,15 @@ shape = SubResource("BoxShape3D_hc81o")
 [node name="mesh" type="MeshInstance3D" parent="obstacle3"]
 mesh = SubResource("BoxMesh_0oeik")
 
+[node name="obstacle8" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.824264, -0.566204, 0, 0.566204, 0.824264, -15.0923, -1.12276, -12.9571)
+
+[node name="shape" type="CollisionShape3D" parent="obstacle8"]
+shape = SubResource("BoxShape3D_hc81o")
+
+[node name="mesh" type="MeshInstance3D" parent="obstacle8"]
+mesh = SubResource("BoxMesh_0oeik")
+
 [node name="vehicle" type="RigidBody3D" parent="." node_paths=PackedStringArray("wheels")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 mass = 2500.0
@@ -761,6 +770,7 @@ stiffness_curve = SubResource("Curve_ihhsw")
 longitudinal_traction_curve = SubResource("Curve_ibqg3")
 lateral_traction_curve = SubResource("Curve_ibqg3")
 is_driven = true
+has_handbrake = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_rl"]
 transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, 0, 0, 0)
@@ -786,6 +796,7 @@ stiffness_curve = SubResource("Curve_ihhsw")
 longitudinal_traction_curve = SubResource("Curve_ibqg3")
 lateral_traction_curve = SubResource("Curve_ibqg3")
 is_driven = true
+has_handbrake = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_rr"]
 transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0, 0, 0)
