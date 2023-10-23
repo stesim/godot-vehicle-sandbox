@@ -1,5 +1,6 @@
-[gd_scene load_steps=65 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=68 format=3 uid="uid://2xgd252vy5bv"]
 
+[ext_resource type="Script" path="res://sandbox.gd" id="1_nf78t"]
 [ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://texture_07.png" id="2_ew4ub"]
 [ext_resource type="Script" path="res://vehicle.gd" id="2_juwt1"]
 [ext_resource type="Script" path="res://wheel.gd" id="2_yic85"]
@@ -9,6 +10,8 @@
 [ext_resource type="AudioStream" uid="uid://bt4wa6p377qf6" path="res://assets/sounds/tires_squal_loop.wav" id="5_l7lxq"]
 [ext_resource type="Script" path="res://camera.gd" id="5_no0k6"]
 [ext_resource type="AudioStream" uid="uid://cc0jrsvptngww" path="res://assets/sounds/motor-loop-2-103532.wav" id="6_cnggs"]
+[ext_resource type="Script" path="res://camera_arm.gd" id="10_2ofnf"]
+[ext_resource type="Script" path="res://camera_crane.gd" id="10_w6w1k"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qvu1f"]
 size = Vector3(64, 1, 64)
@@ -574,7 +577,10 @@ sky = SubResource("Sky_1b7ln")
 tonemap_mode = 2
 glow_enabled = true
 
-[node name="sandbox" type="Node3D"]
+[node name="sandbox" type="Node3D" node_paths=PackedStringArray("camera_crane", "camera_views")]
+script = ExtResource("1_nf78t")
+camera_crane = NodePath("camera_crane")
+camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehicle/camera_view_side")]
 
 [node name="ground" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.999999, 0, 0, 0)
@@ -841,6 +847,7 @@ drive_loop = NodePath("../motor_sound")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
 stream = ExtResource("5_l7lxq")
 attenuation_model = 1
+volume_db = -80.0
 
 [node name="controller" type="Node" parent="vehicle/slide_sound" node_paths=PackedStringArray("slide_loop")]
 script = ExtResource("5_d2c43")
@@ -853,10 +860,26 @@ slip_volume_min = 0.25
 slip_volume_max = 1.0
 slip_volume_curve = SubResource("Curve_mtbea")
 
-[node name="camera" type="Camera3D" parent="." node_paths=PackedStringArray("target")]
-transform = Transform3D(0.017569, -0.354237, 0.934991, 0, 0.935135, 0.354292, -0.999846, -0.00622455, 0.0164294, 7.85633, 2.67388, -3.95224)
+[node name="camera_target" type="Node3D" parent="vehicle"]
+
+[node name="look_ahead" type="Node3D" parent="vehicle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+
+[node name="camera_view_back" type="Marker3D" parent="vehicle/look_ahead"]
+transform = Transform3D(1, 0, 0, 0, 0.969274, 0.245984, 0, -0.245984, 0.969274, 0, 4.55736, 11.7255)
+script = ExtResource("10_2ofnf")
+stiffness = 6.0
+
+[node name="camera_view_side" type="Marker3D" parent="vehicle"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 1, 0)
+
+[node name="camera_crane" type="Node3D" parent="." node_paths=PackedStringArray("subject")]
+script = ExtResource("10_w6w1k")
+subject = NodePath("../vehicle/camera_target")
+
+[node name="camera" type="Camera3D" parent="camera_crane" node_paths=PackedStringArray("target")]
 script = ExtResource("5_no0k6")
-target = NodePath("../vehicle")
+target = NodePath("../../vehicle")
 
 [node name="environment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_p1wvc")
