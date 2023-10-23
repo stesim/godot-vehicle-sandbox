@@ -35,6 +35,7 @@ color_ramp = SubResource("GradientTexture1D_veaja")
 transparency = 1
 shading_mode = 0
 vertex_color_use_as_albedo = true
+albedo_color = Color(1, 1, 1, 0.501961)
 albedo_texture = ExtResource("1_7mxc0")
 billboard_mode = 3
 billboard_keep_scale = true
