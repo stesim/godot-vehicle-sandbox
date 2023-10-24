@@ -2,12 +2,6 @@ class_name Motor
 extends Resource
 
 
-@export var rpm := 0.0 :
-	set(value):
-		rpm = clampf(value, 0.0, rpm_limit)
-
-@export var throttle := 0.0
-
 @export var peak_torque := 600.0
 
 @export var rpm_limit := 5000.0
@@ -15,6 +9,14 @@ extends Resource
 @export var normalization_rpm := 5000.0
 
 @export var normalized_torque_curve : Curve
+
+@export_subgroup("Input")
+
+@export var rpm := 0.0 :
+	set(value):
+		rpm = clampf(value, 0.0, rpm_limit)
+
+@export var throttle := 0.0
 
 
 var _torque_output := 0.0

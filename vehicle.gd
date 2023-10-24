@@ -2,8 +2,6 @@ class_name Vehicle
 extends RigidBody3D
 
 
-@export var gear_ratio := 12.0
-
 @export var max_steering_angle := deg_to_rad(30.0)
 
 @export var max_brake_torque := 4000.0
@@ -13,6 +11,8 @@ extends RigidBody3D
 @export var auto_brake_threshold := 0.25
 
 @export var motor : Motor
+
+@export var transmission : Transmission
 
 @export var wheels : Array[Wheel] = []
 
@@ -30,15 +30,26 @@ var _steering_input := 0.0
 var _brake_input := 0.0
 
 
+func _ready() -> void:
+	transmission.gear = transmission.neutral_gear + 1
+
+
 func _process(delta : float) -> void:
 	_update_inputs(delta)
 	_update_audio()
 
 
 func _integrate_forces(state : PhysicsDirectBodyState3D) -> void:
-	_apply_drive_input()
+	_apply_drive_input(state.step)
 	_apply_suspension_forces(state)
 	_apply_tire_forces(state)
+
+
+func _unhandled_input(event : InputEvent) -> void:
+	if event.is_action_pressed(&"shift_up"):
+		transmission.shift_relative(+1)
+	elif event.is_action_pressed(&"shift_down"):
+		transmission.shift_relative(-1)
 
 
 func _apply_wheel_inputs(delta : float) -> void:
@@ -72,45 +83,32 @@ func _update_inputs(delta : float) -> void:
 	_apply_steering_input()
 
 
-func _apply_drive_input() -> void:
+func _apply_drive_input(delta : float) -> void:
 	var num_driven_wheels := 0
 	var brake_torque := 0.0
 	var handbrake_torque := _brake_input * max_handbrake_torque
 
-	if is_zero_approx(_engine_input):
-		motor.throttle = 0.0
-	else:
-		var average_velocity := 0.0
-		var average_slip := 0.0
-		for wheel in wheels:
-			if wheel.is_driven:
-				num_driven_wheels += 1
-				average_velocity += wheel.get_angular_velocity() * wheel.radius
-				average_slip += wheel.get_slip_velocity().x
-		average_velocity /= num_driven_wheels
-		average_slip /= num_driven_wheels
-
-		var should_brake := (
-			-average_velocity * signf(_engine_input) > auto_brake_threshold
-			or is_zero_approx(average_velocity) and average_slip * signf(_engine_input) > auto_brake_threshold
-		)
-
-		if should_brake:
-			var auto_brake_torque := absf(_engine_input) * max_brake_torque
-			brake_torque = maxf(brake_torque, auto_brake_torque)
-		else:
-			motor.throttle = absf(_engine_input)
-
-	var feedback_rpm := INF
 	for wheel in wheels:
 		if wheel.is_driven:
-			feedback_rpm = minf(feedback_rpm, absf(wheel.get_rpm()))
-	motor.rpm = feedback_rpm * gear_ratio
+			num_driven_wheels += 1
+
+	var gear_ratio := transmission.get_current_gear_ratio()
+	motor.throttle = maxf(0.0, _engine_input)
+	var brake_strength := maxf(0.0, -_engine_input)
+	brake_torque = brake_strength * max_brake_torque
+
+	if not is_zero_approx(gear_ratio):
+		var feedback_rpm := INF
+		for wheel in wheels:
+			if wheel.is_driven:
+				feedback_rpm = minf(feedback_rpm, absf(wheel.get_rpm()))
+		motor.rpm = feedback_rpm * absf(gear_ratio)
 
 	motor.update()
+	transmission.torque_input = motor.get_torque_output()
+	transmission.update(delta)
 
-	var engine_torque := signf(_engine_input) * motor.get_torque_output()
-	var wheel_torque := gear_ratio * engine_torque / num_driven_wheels if num_driven_wheels > 0 else 0.0
+	var wheel_torque := transmission.get_torque_output() / num_driven_wheels if num_driven_wheels > 0 else 0.0
 	for wheel in wheels:
 		wheel.brake_torque = maxf(brake_torque, handbrake_torque) if wheel.has_handbrake else brake_torque
 		if wheel.is_driven:
@@ -166,8 +164,7 @@ func _update_motor_audio() -> void:
 				absf(wheel.get_angular_velocity())
 			)
 
-	var wheel_rpm := _angular_velocity_to_rpm(wheel_angular_velocity)
-	var motor_rpm := gear_ratio * wheel_rpm
+	var motor_rpm := motor.rpm
 	# HACK: artificial clamp on rpm until proper motor simulation takes over
 	motor_audio_controller.rpm = clampf(motor_rpm, 300.0, 6000.0)
 
