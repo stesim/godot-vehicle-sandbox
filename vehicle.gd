@@ -2,8 +2,6 @@ class_name Vehicle
 extends RigidBody3D
 
 
-@export var max_engine_torque := 500.0
-
 @export var gear_ratio := 12.0
 
 @export var max_steering_angle := deg_to_rad(30.0)
@@ -13,6 +11,8 @@ extends RigidBody3D
 @export var max_handbrake_torque := 1550.0
 
 @export var auto_brake_threshold := 0.25
+
+@export var motor : Motor
 
 @export var wheels : Array[Wheel] = []
 
@@ -36,6 +36,7 @@ func _process(delta : float) -> void:
 
 
 func _integrate_forces(state : PhysicsDirectBodyState3D) -> void:
+	_apply_drive_input()
 	_apply_suspension_forces(state)
 	_apply_tire_forces(state)
 
@@ -68,17 +69,17 @@ func _update_inputs(delta : float) -> void:
 	_brake_input = move_toward(_brake_input, Input.get_action_strength(&"brake"), delta * input_speed)
 	_steering_input = move_toward(_steering_input, Input.get_axis(&"steer_right", &"steer_left"), delta * input_speed)
 
-	_apply_drive_input()
 	_apply_steering_input()
 
 
 func _apply_drive_input() -> void:
-	var engine_torque := 0.0
 	var num_driven_wheels := 0
 	var brake_torque := 0.0
 	var handbrake_torque := _brake_input * max_handbrake_torque
 
-	if not is_zero_approx(_engine_input):
+	if is_zero_approx(_engine_input):
+		motor.throttle = 0.0
+	else:
 		var average_velocity := 0.0
 		var average_slip := 0.0
 		for wheel in wheels:
@@ -98,9 +99,18 @@ func _apply_drive_input() -> void:
 			var auto_brake_torque := absf(_engine_input) * max_brake_torque
 			brake_torque = maxf(brake_torque, auto_brake_torque)
 		else:
-			engine_torque = _engine_input * max_engine_torque * gear_ratio
+			motor.throttle = absf(_engine_input)
 
-	var wheel_torque := engine_torque / num_driven_wheels if num_driven_wheels > 0 else 0.0
+	var feedback_rpm := INF
+	for wheel in wheels:
+		if wheel.is_driven:
+			feedback_rpm = minf(feedback_rpm, absf(wheel.get_rpm()))
+	motor.rpm = feedback_rpm * gear_ratio
+
+	motor.update()
+
+	var engine_torque := signf(_engine_input) * motor.get_torque_output()
+	var wheel_torque := gear_ratio * engine_torque / num_driven_wheels if num_driven_wheels > 0 else 0.0
 	for wheel in wheels:
 		wheel.brake_torque = maxf(brake_torque, handbrake_torque) if wheel.has_handbrake else brake_torque
 		if wheel.is_driven:

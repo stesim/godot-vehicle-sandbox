@@ -76,6 +76,10 @@ func get_angular_velocity() -> float:
 	return _angular_velocity
 
 
+func get_rpm() -> float:
+	return _angular_velocity / TAU * 60.0
+
+
 func get_slip_velocity() -> Vector2:
 	return _slip
 
@@ -138,9 +142,9 @@ func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass :
 	var longitudinal_traction_force := tire_load * grip.x
 	var lateral_traction_force := tire_load * grip.y
 
-	#var lateral_traction_force_limit := virtual_mass * slip.y / vehicle_state.step
-	#if not is_zero_approx(lateral_traction_force_limit) and lateral_traction_force / lateral_traction_force_limit > 1.0:
-	#	lateral_traction_force = lateral_traction_force_limit
+	var lateral_traction_force_limit := virtual_mass * _slip.y / vehicle_state.step
+	if not is_zero_approx(lateral_traction_force_limit) and lateral_traction_force / lateral_traction_force_limit > 1.0:
+		lateral_traction_force = lateral_traction_force_limit
 
 	var traction_force := longitudinal_traction_force * forward + lateral_traction_force * right
 	var force_position := get_collision_point() - vehicle_state.transform.origin
