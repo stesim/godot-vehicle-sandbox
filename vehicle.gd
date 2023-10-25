@@ -29,9 +29,15 @@ var _steering_input := 0.0
 
 var _brake_input := 0.0
 
+var _handbrake_input := 0.0
+
 
 func _ready() -> void:
 	transmission.gear = transmission.neutral_gear + 1
+
+	linear_damp = 0.0056
+	#await get_tree().create_timer(1.0).timeout
+	#apply_central_impulse(10000.0 * -global_transform.basis.z)
 
 
 func _process(delta : float) -> void:
@@ -71,13 +77,13 @@ func _apply_suspension_forces(state : PhysicsDirectBodyState3D) -> void:
 
 func _apply_tire_forces(state : PhysicsDirectBodyState3D) -> void:
 	for wheel in wheels:
-		var virtual_mass := mass / wheels.size()
-		wheel.apply_drive_forces(state, virtual_mass)
+		wheel.apply_drive_forces(state)
 
 
 func _update_inputs(delta : float) -> void:
-	_engine_input = move_toward(_engine_input, Input.get_axis(&"reverse", &"accelerate"), delta * input_speed)
+	_engine_input = move_toward(_engine_input, Input.get_action_strength(&"accelerate"), delta * input_speed)
 	_brake_input = move_toward(_brake_input, Input.get_action_strength(&"brake"), delta * input_speed)
+	_handbrake_input = move_toward(_handbrake_input, Input.get_action_strength(&"handbrake"), delta * input_speed)
 	_steering_input = move_toward(_steering_input, Input.get_axis(&"steer_right", &"steer_left"), delta * input_speed)
 
 	_apply_steering_input()
@@ -86,17 +92,16 @@ func _update_inputs(delta : float) -> void:
 func _apply_drive_input(delta : float) -> void:
 	var num_driven_wheels := 0
 	var brake_torque := 0.0
-	var handbrake_torque := _brake_input * max_handbrake_torque
+	var handbrake_torque := _handbrake_input * max_handbrake_torque
 
 	for wheel in wheels:
 		if wheel.is_driven:
 			num_driven_wheels += 1
 
-	var gear_ratio := transmission.get_current_gear_ratio()
-	motor.throttle = maxf(0.0, _engine_input)
-	var brake_strength := maxf(0.0, -_engine_input)
-	brake_torque = brake_strength * max_brake_torque
+	motor.throttle = _engine_input
+	brake_torque = _brake_input * max_brake_torque
 
+	var gear_ratio := transmission.get_current_gear_ratio()
 	if not is_zero_approx(gear_ratio):
 		var feedback_rpm := INF
 		for wheel in wheels:

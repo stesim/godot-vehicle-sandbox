@@ -1,6 +1,7 @@
-[gd_scene load_steps=75 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=76 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Script" path="res://sandbox.gd" id="1_nf78t"]
+[ext_resource type="Script" path="res://game_controller.gd" id="2_eqkow"]
 [ext_resource type="Script" path="res://vehicle.gd" id="2_juwt1"]
 [ext_resource type="Script" path="res://wheel.gd" id="2_yic85"]
 [ext_resource type="Texture2D" uid="uid://cb5g8miqmixlq" path="res://assets/mercedes_g_class/mercedes_benz_g-class_w263_0.png" id="3_r3m2b"]
@@ -18,7 +19,7 @@
 [ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://assets/textures/texture_07.png" id="14_ejoip"]
 
 [sub_resource type="Curve" id="Curve_dce3y"]
-_data = [Vector2(0, 0.484211), 0.0, 0.0, 0, 0, Vector2(0.239521, 1), 0.0, 0.0, 0, 0, Vector2(0.930107, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.463158), 0.0, 0.0, 0, 0]
+_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.239521, 1), 1.35572, 0.0, 0, 0, Vector2(0.930107, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.463158), 0.0, 0.0, 0, 0]
 point_count = 4
 
 [sub_resource type="Resource" id="Resource_i3gln"]
@@ -438,7 +439,7 @@ shadow_mesh = SubResource("ArrayMesh_pdbvp")
 
 [sub_resource type="Curve" id="Curve_ihhsw"]
 max_value = 4.0
-_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.8, 1), 0.0, 0.0, 0, 0, Vector2(1, 4), 46.2876, 0.0, 0, 0]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.9, 1), 0.0, 0.0, 0, 0, Vector2(1, 1.5), 17.0026, 0.0, 0, 0]
 point_count = 3
 
 [sub_resource type="Curve" id="Curve_ibqg3"]
@@ -585,10 +586,10 @@ size = Vector2(128, 128)
 [sub_resource type="BoxMesh" id="BoxMesh_hatsg"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_hc81o"]
-size = Vector3(8, 8, 8)
+size = Vector3(16, 8, 24)
 
 [sub_resource type="BoxMesh" id="BoxMesh_0oeik"]
-size = Vector3(8, 8, 8)
+size = Vector3(16, 8, 24)
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_lmsou"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -608,17 +609,24 @@ script = ExtResource("1_nf78t")
 camera_crane = NodePath("camera_crane")
 camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehicle/camera_view_side")]
 
+[node name="controller" type="Node" parent="."]
+script = ExtResource("2_eqkow")
+
 [node name="vehicle" type="RigidBody3D" parent="." node_paths=PackedStringArray("wheels", "motor_audio_controller", "wheel_audio_controller")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.460675, 1.5, 48.4579)
 mass = 2500.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, 0.2, 0)
 can_sleep = false
+linear_damp_mode = 1
+linear_damp = 0.006
 script = ExtResource("2_juwt1")
+max_brake_torque = 6000.0
+max_handbrake_torque = 2800.0
 motor = SubResource("Resource_i3gln")
 transmission = SubResource("Resource_4i8ft")
 wheels = [NodePath("wheel_fl"), NodePath("wheel_fr"), NodePath("wheel_rl"), NodePath("wheel_rr")]
-motor_audio_controller = NodePath("motor_audio_controller")
+motor_audio_controller = NodePath("motor_sound/controller")
 wheel_audio_controller = NodePath("slide_sound/controller")
 
 [node name="shape_1" type="CollisionShape3D" parent="vehicle"]
@@ -811,11 +819,11 @@ smoke = NodePath("..")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.483242, -1.46505)
 stream = ExtResource("6_cnggs")
 
-[node name="motor_audio_controller" type="Node" parent="vehicle" node_paths=PackedStringArray("drive_loop")]
+[node name="controller" type="Node" parent="vehicle/motor_sound" node_paths=PackedStringArray("drive_loop")]
 script = ExtResource("5_3q0g4")
 baseline_rpm = 900.0
 pitch_scale = 3000.0
-drive_loop = NodePath("../motor_sound")
+drive_loop = NodePath("..")
 
 [node name="slide_sound" type="AudioStreamPlayer3D" parent="vehicle"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
@@ -920,7 +928,7 @@ shape = SubResource("BoxShape3D_av3ol")
 mesh = SubResource("BoxMesh_hatsg")
 
 [node name="obstacle3" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.94824, -0.317552, 0, 0.317552, 0.94824, -1.42615, -2.5619, -12.9571)
+transform = Transform3D(1, 0, 0, 0, 0.94824, -0.317552, 0, 0.317552, 0.94824, -32, 0, -6)
 
 [node name="shape" type="CollisionShape3D" parent="obstacle3"]
 shape = SubResource("BoxShape3D_hc81o")
@@ -929,7 +937,7 @@ shape = SubResource("BoxShape3D_hc81o")
 mesh = SubResource("BoxMesh_0oeik")
 
 [node name="obstacle8" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.824264, -0.566204, 0, 0.566204, 0.824264, -15.0923, -1.12276, -12.9571)
+transform = Transform3D(1, 0, 0, 0, 0.824264, -0.566204, 0, 0.566204, 0.824264, -16, 3.5, -12)
 
 [node name="shape" type="CollisionShape3D" parent="obstacle8"]
 shape = SubResource("BoxShape3D_hc81o")
@@ -943,3 +951,70 @@ environment = SubResource("Environment_p1wvc")
 [node name="sun" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
 shadow_enabled = true
+
+[node name="hud" type="CanvasLayer" parent="."]
+
+[node name="dash" type="HBoxContainer" parent="hud"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -288.0
+offset_top = -152.0
+offset_right = 288.0
+offset_bottom = -31.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 64
+
+[node name="speed" type="VBoxContainer" parent="hud/dash"]
+layout_mode = 2
+
+[node name="speed_label" type="Label" parent="hud/dash/speed"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "0"
+horizontal_alignment = 1
+
+[node name="speed_units" type="Label" parent="hud/dash/speed"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.705882, 0.705882, 0.705882, 1)
+text = "km/h"
+
+[node name="gear" type="VBoxContainer" parent="hud/dash"]
+layout_mode = 2
+
+[node name="gear_label" type="Label" parent="hud/dash/gear"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "N"
+horizontal_alignment = 1
+
+[node name="label" type="Label" parent="hud/dash/gear"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.705882, 0.705882, 0.705882, 1)
+text = "gear"
+
+[node name="rpm" type="VBoxContainer" parent="hud/dash"]
+layout_mode = 2
+
+[node name="rpm_label" type="Label" parent="hud/dash/rpm"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "0"
+horizontal_alignment = 1
+
+[node name="rpm_units" type="Label" parent="hud/dash/rpm"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.705882, 0.705882, 0.705882, 1)
+text = "1/min"

@@ -113,79 +113,96 @@ func apply_bottom_out_impulse(vehicle_state : PhysicsDirectBodyState3D, virtual_
 	var up := global_transform.basis.y
 	var wheel_velocity_along_spring := _contact_velocity.dot(up)
 	if wheel_velocity_along_spring < 0.0:
+		# TODO: compute impulse so that it compensates for the invalid position and angular velocity
+		#       instead of only stopping the linear velocity
 		var bottom_out_impulse := -virtual_mass * wheel_velocity_along_spring * up
 		var impulse_position := get_collision_point() - vehicle_state.transform.origin
 		vehicle_state.apply_force(bottom_out_impulse / vehicle_state.step, impulse_position)
 
 
-func apply_drive_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
+func apply_drive_forces(vehicle_state : PhysicsDirectBodyState3D) -> void:
+	var applied_brake_torque := 0.0
+
 	_angular_velocity += vehicle_state.step * drive_torque / inertia
-	var applied_brake_torque := _apply_brake_torque(-signf(_angular_velocity) * brake_torque, vehicle_state.step)
+	var drive_brake_torque := -signf(_angular_velocity) * brake_torque - applied_brake_torque
+	applied_brake_torque += _apply_brake_torque(drive_brake_torque, vehicle_state.step)
 
 	if is_colliding():
-		_apply_tire_forces(vehicle_state, virtual_mass)
+		_apply_tire_forces(vehicle_state, applied_brake_torque)
 		var traction_brake_torque := -signf(_angular_velocity) * brake_torque - applied_brake_torque
 		applied_brake_torque += _apply_brake_torque(traction_brake_torque, vehicle_state.step)
 	else:
 		_slip = Vector2.ZERO
 
 
-func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
+func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, applied_brake_torque : float) -> void:
 	var contact_normal := get_collision_normal()
 	var forward := contact_normal.cross(global_transform.basis.x).normalized()
 	var right := forward.cross(contact_normal).normalized()
 
 	_slip = _calculate_slip(forward, right)
 	var grip := _calculate_grip(_slip)
-
 	var tire_load := _suspension_force
-	var longitudinal_traction_force := tire_load * grip.x
-	var lateral_traction_force := tire_load * grip.y
+	var traction := tire_load * grip
 
-	var lateral_traction_force_limit := virtual_mass * _slip.y / vehicle_state.step
-	if not is_zero_approx(lateral_traction_force_limit) and lateral_traction_force / lateral_traction_force_limit > 1.0:
-		lateral_traction_force = lateral_traction_force_limit
+	var traction_limits := _calculate_traction_limits(vehicle_state, _slip, forward, right)
 
-	var traction_force := longitudinal_traction_force * forward + lateral_traction_force * right
+	# NOTE: brake must be considered, since it will potentially counteract the traction force
+	traction_limits.x += signf(traction_limits.x) * brake_torque / radius
+	if traction_limits.x / applied_brake_torque > 0.0:
+		traction_limits.x -= applied_brake_torque / radius
+
+	if traction.x / traction_limits.x < 0.0:
+		traction.x = 0.0
+	elif traction.x / traction_limits.x > 1.0:
+		traction.x = traction_limits.x
+
+	#if traction.y / traction_limits.y < 0.0:
+	#	traction.y = 0.0
+	#elif traction.y / traction_limits.y > 1.0:
+	#	traction.y = traction_limits.y
+
+	var feedback_torque := -traction.x * radius
+	_angular_velocity += vehicle_state.step * feedback_torque / inertia
+
+	var traction_force := traction.x * forward + traction.y * right
 	var force_position := get_collision_point() - vehicle_state.transform.origin
 	vehicle_state.apply_force(traction_force, force_position)
-
-	_apply_traction_feedback(vehicle_state, _slip.x, virtual_mass, forward, longitudinal_traction_force)
 
 	_slip = _calculate_slip(forward, right)
 
 
-func _apply_traction_feedback(vehicle_state : PhysicsDirectBodyState3D, slip : float, virtual_mass : float, forward : Vector3, traction_force : float) -> void:
-	var contact_point_local := get_collision_point() - vehicle_state.transform.origin
-	var vehicle_inertia_inv := vehicle_state.inverse_inertia_tensor
+func _calculate_traction_limits(vehicle_state : PhysicsDirectBodyState3D, slip : Vector2, forward : Vector3, right : Vector3) -> Vector2:
+	var force_position := get_collision_point() - vehicle_state.transform.origin
 
 	var dv_rotation := -vehicle_state.step * radius * radius / inertia
-	var dv_contact := vehicle_state.step * (1.0 / virtual_mass + (vehicle_inertia_inv * forward.cross(contact_point_local)).cross(contact_point_local).dot(forward))
-	var ds_max := -slip
-	var gravity := vehicle_state.total_gravity.dot(forward)
+	var dv_contact_x := vehicle_state.step * (vehicle_state.inverse_mass + (vehicle_state.inverse_inertia_tensor * forward.cross(force_position)).cross(force_position).dot(forward))
+	var dv_contact_y := vehicle_state.step * (vehicle_state.inverse_mass + (vehicle_state.inverse_inertia_tensor * right.cross(force_position)).cross(force_position).dot(right))
 
-	var traction_torque := -traction_force * radius
-	var traction_torque_limit := -radius * (ds_max / (dv_rotation - dv_contact) - gravity)
-	if traction_torque / traction_torque_limit > 1.0:
-		traction_torque = traction_torque_limit
-	_angular_velocity += vehicle_state.step * traction_torque / inertia
+	var traction_force_limits := Vector2(
+		-slip.x / (dv_rotation - dv_contact_x) - vehicle_state.total_gravity.dot(forward),
+		-slip.y / (-dv_contact_y) - vehicle_state.total_gravity.dot(right),
+	)
+	return traction_force_limits
 
 
 func _apply_brake_torque(torque : float, delta : float) -> float:
-	if is_zero_approx(_angular_velocity):
-		return 0.0
 	var brake_torque_limit := -_angular_velocity * inertia / delta
-	if torque / brake_torque_limit > 1.0:
+	var ratio := torque / brake_torque_limit
+	if ratio < 0.0:
+		torque = 0.0
+	elif ratio > 1.0:
 		torque = brake_torque_limit
 	_angular_velocity += delta * torque / inertia
 	return torque
 
 
 func _calculate_slip(forward : Vector3, right : Vector3) -> Vector2:
-	var rotation_velocity := radius * _angular_velocity
+	var rotation_velocity := radius * _angular_velocity * forward
+	var relative_velocity := rotation_velocity - _contact_velocity
 	var slip := Vector2(
-		rotation_velocity - _contact_velocity.dot(forward),
-		-_contact_velocity.dot(right)
+		relative_velocity.dot(forward),
+		relative_velocity.dot(right)
 	)
 	return slip
 
