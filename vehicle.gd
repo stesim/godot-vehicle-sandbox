@@ -101,15 +101,16 @@ func _apply_drive_input(delta : float) -> void:
 	motor.throttle = _engine_input
 	brake_torque = _brake_input * max_brake_torque
 
-	var gear_ratio := transmission.get_current_gear_ratio()
-	if not is_zero_approx(gear_ratio):
+	if transmission.gear == transmission.neutral_gear:
+		motor.rpm_feedback = -1.0
+	else:
 		var feedback_rpm := INF
 		for wheel in wheels:
 			if wheel.is_driven:
 				feedback_rpm = minf(feedback_rpm, absf(wheel.get_rpm()))
-		motor.rpm = feedback_rpm * absf(gear_ratio)
+		motor.rpm_feedback = feedback_rpm * absf(transmission.get_current_gear_ratio())
 
-	motor.update()
+	motor.update(delta)
 	transmission.torque_input = motor.get_torque_output()
 	transmission.update(delta)
 
@@ -169,9 +170,7 @@ func _update_motor_audio() -> void:
 				absf(wheel.get_angular_velocity())
 			)
 
-	var motor_rpm := motor.rpm
-	# HACK: artificial clamp on rpm until proper motor simulation takes over
-	motor_audio_controller.rpm = clampf(motor_rpm, 300.0, 6000.0)
+	motor_audio_controller.rpm = motor.rpm
 
 
 func _update_wheel_audio() -> void:
