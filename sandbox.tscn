@@ -1,4 +1,4 @@
-[gd_scene load_steps=77 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=81 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Script" path="res://sandbox.gd" id="1_nf78t"]
 [ext_resource type="Script" path="res://game_controller.gd" id="2_eqkow"]
@@ -14,6 +14,8 @@
 [ext_resource type="PackedScene" uid="uid://dwe133wihy5oc" path="res://smoke_particles.tscn" id="6_02ux7"]
 [ext_resource type="AudioStream" uid="uid://cc0jrsvptngww" path="res://assets/sounds/motor-loop-2-103532.wav" id="6_cnggs"]
 [ext_resource type="Script" path="res://skid_smoke_controller.gd" id="7_5wx1i"]
+[ext_resource type="Script" path="res://tire.gd" id="8_f8wy6"]
+[ext_resource type="Script" path="res://suspension.gd" id="8_ph7pb"]
 [ext_resource type="Script" path="res://camera_arm.gd" id="10_2ofnf"]
 [ext_resource type="Script" path="res://camera_crane.gd" id="10_w6w1k"]
 [ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://assets/textures/texture_07.png" id="14_ejoip"]
@@ -447,13 +449,29 @@ max_value = 4.0
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.9, 1), 0.0, 0.0, 0, 0, Vector2(1, 1.5), 17.0026, 0.0, 0, 0]
 point_count = 3
 
-[sub_resource type="Curve" id="Curve_ibqg3"]
-_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.1, 0.5), 0.0, 3.33333, 0, 1, Vector2(0.25, 1), 3.33333, 0.0, 1, 0]
-point_count = 3
+[sub_resource type="Resource" id="Resource_htyri"]
+script = ExtResource("8_ph7pb")
+rest_length = 0.2
+stiffness = 50000.0
+stiffness_curve = SubResource("Curve_ihhsw")
+damping = 5000.0
 
 [sub_resource type="Curve" id="Curve_ov6qw"]
-_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.1, 0.5), 0.0, 3.33333, 0, 1, Vector2(0.25, 1), 3.33333, 0.0, 1, 0]
-point_count = 3
+_data = [Vector2(0, 0.515789), 0.0, 0.106433, 0, 1, Vector2(0.0989011, 0.526316), 0.0, 0.0, 0, 0, Vector2(0.25, 1), 0.0, 0.0, 0, 0, Vector2(0.56044, 0.936842), -0.155335, -0.155335, 0, 0, Vector2(1, 0.9), 0.0, 0.0, 0, 0]
+point_count = 5
+
+[sub_resource type="Curve" id="Curve_ibqg3"]
+_data = [Vector2(0, 0.494737), 0.0, 0.136842, 0, 1, Vector2(0.0769231, 0.505263), 0.0, 0.0, 0, 0, Vector2(0.18, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.66), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Resource" id="Resource_hkimi"]
+script = ExtResource("8_f8wy6")
+friction_limit = 1.0
+magic_tweak_factor = 0.5
+longitudinal_traction_curve = SubResource("Curve_ibqg3")
+longitudinal_traction_curve_scale = Vector2(1, 1)
+lateral_traction_curve = SubResource("Curve_ov6qw")
+lateral_traction_curve_scale = Vector2(0.175, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l63hl"]
 resource_name = "Material.006"
@@ -616,22 +634,20 @@ glow_enabled = true
 [node name="sandbox" type="Node3D" node_paths=PackedStringArray("camera_crane", "camera_views")]
 script = ExtResource("1_nf78t")
 camera_crane = NodePath("camera_crane")
-camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehicle/camera_view_side")]
+camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehicle/camera_view_back_right"), NodePath("vehicle/camera_view_right"), NodePath("vehicle/camera_view_left")]
 
 [node name="controller" type="Node" parent="."]
 script = ExtResource("2_eqkow")
 
 [node name="vehicle" type="RigidBody3D" parent="." node_paths=PackedStringArray("wheels", "motor_audio_controller", "wheel_audio_controller")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.460675, 1.5, 48.4579)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.460675, 0.813854, 48.4579)
 mass = 2500.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, 0.2, 0)
 can_sleep = false
-linear_damp_mode = 1
-linear_damp = 0.006
 script = ExtResource("2_juwt1")
 max_brake_torque = 6000.0
-max_handbrake_torque = 2800.0
+max_handbrake_torque = 2000.0
 motor = SubResource("Resource_i3gln")
 transmission = SubResource("Resource_4i8ft")
 wheels = [NodePath("wheel_fl"), NodePath("wheel_fr"), NodePath("wheel_rl"), NodePath("wheel_rr")]
@@ -696,10 +712,8 @@ skeleton = NodePath("")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, -1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
-rest_length = 0.25
-stiffness_curve = SubResource("Curve_ihhsw")
-longitudinal_traction_curve = SubResource("Curve_ibqg3")
-lateral_traction_curve = SubResource("Curve_ov6qw")
+suspension = SubResource("Resource_htyri")
+tire = SubResource("Resource_hkimi")
 is_driven = true
 is_steering = true
 
@@ -729,10 +743,8 @@ smoke = NodePath("..")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, -1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
-rest_length = 0.25
-stiffness_curve = SubResource("Curve_ihhsw")
-longitudinal_traction_curve = SubResource("Curve_ibqg3")
-lateral_traction_curve = SubResource("Curve_ov6qw")
+suspension = SubResource("Resource_htyri")
+tire = SubResource("Resource_hkimi")
 is_driven = true
 is_steering = true
 
@@ -762,10 +774,8 @@ smoke = NodePath("..")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, 1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
-rest_length = 0.25
-stiffness_curve = SubResource("Curve_ihhsw")
-longitudinal_traction_curve = SubResource("Curve_ibqg3")
-lateral_traction_curve = SubResource("Curve_ov6qw")
+suspension = SubResource("Resource_htyri")
+tire = SubResource("Resource_hkimi")
 is_driven = true
 has_handbrake = true
 
@@ -795,10 +805,8 @@ smoke = NodePath("..")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, 1.45)
 script = ExtResource("2_yic85")
 visuals = NodePath("visuals")
-rest_length = 0.25
-stiffness_curve = SubResource("Curve_ihhsw")
-longitudinal_traction_curve = SubResource("Curve_ibqg3")
-lateral_traction_curve = SubResource("Curve_ov6qw")
+suspension = SubResource("Resource_htyri")
+tire = SubResource("Resource_hkimi")
 is_driven = true
 has_handbrake = true
 
@@ -861,8 +869,14 @@ transform = Transform3D(1, 0, 0, 0, 0.969274, 0.245984, 0, -0.245984, 0.969274, 
 script = ExtResource("10_2ofnf")
 stiffness = 6.0
 
-[node name="camera_view_side" type="Marker3D" parent="vehicle"]
+[node name="camera_view_back_right" type="Marker3D" parent="vehicle"]
+transform = Transform3D(0.958083, -0.138447, 0.250818, 0, 0.875482, 0.48325, -0.286491, -0.462994, 0.838785, 2.6923, 4.05155, 6.81727)
+
+[node name="camera_view_right" type="Marker3D" parent="vehicle"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 1, 0)
+
+[node name="camera_view_left" type="Marker3D" parent="vehicle"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -6, 1, 0)
 
 [node name="camera_crane" type="Node3D" parent="." node_paths=PackedStringArray("subject")]
 script = ExtResource("10_w6w1k")

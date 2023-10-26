@@ -35,7 +35,8 @@ var _handbrake_input := 0.0
 func _ready() -> void:
 	transmission.gear = transmission.neutral_gear + 1
 
-	linear_damp = 0.0056
+	#linear_damp_mode = RigidBody3D.DAMP_MODE_REPLACE
+	#linear_damp = 0.0056
 	#await get_tree().create_timer(1.0).timeout
 	#apply_central_impulse(10000.0 * -global_transform.basis.z)
 
@@ -72,7 +73,7 @@ func _apply_suspension_forces(state : PhysicsDirectBodyState3D) -> void:
 			# NOTE: assumes uniform mass distribution, but appears to work reasonably well
 			# TODO: more accurate solution?
 			var virtual_mass := mass / wheels.size()
-			wheel.apply_bottom_out_impulse(state, virtual_mass)
+			wheel.apply_bottom_out_force(state, virtual_mass)
 
 
 func _apply_tire_forces(state : PhysicsDirectBodyState3D) -> void:
@@ -104,11 +105,12 @@ func _apply_drive_input(delta : float) -> void:
 	if transmission.gear == transmission.neutral_gear:
 		motor.rpm_feedback = -1.0
 	else:
+		var gear_ratio := transmission.get_current_gear_ratio()
 		var feedback_rpm := INF
 		for wheel in wheels:
 			if wheel.is_driven:
-				feedback_rpm = minf(feedback_rpm, absf(wheel.get_rpm()))
-		motor.rpm_feedback = feedback_rpm * absf(transmission.get_current_gear_ratio())
+				feedback_rpm = minf(feedback_rpm, gear_ratio * wheel.get_rpm())
+		motor.rpm_feedback = feedback_rpm
 
 	motor.update(delta)
 	transmission.torque_input = motor.get_torque_output()
