@@ -33,12 +33,7 @@ var _handbrake_input := 0.0
 
 
 func _ready() -> void:
-	transmission.gear = transmission.neutral_gear + 1
-
-	#linear_damp_mode = RigidBody3D.DAMP_MODE_REPLACE
-	#linear_damp = 0.0056
-	#await get_tree().create_timer(1.0).timeout
-	#apply_central_impulse(10000.0 * -global_transform.basis.z)
+	pass
 
 
 func _process(delta : float) -> void:
@@ -70,8 +65,6 @@ func _apply_suspension_forces(state : PhysicsDirectBodyState3D) -> void:
 
 	for wheel in wheels:
 		if wheel.is_bottoming_out():
-			# NOTE: assumes uniform mass distribution, but appears to work reasonably well
-			# TODO: more accurate solution?
 			var virtual_mass := mass / wheels.size()
 			wheel.apply_bottom_out_force(state, virtual_mass)
 

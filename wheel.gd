@@ -76,6 +76,11 @@ func is_bottoming_out() -> bool:
 
 
 func apply_suspension_force(vehicle_state : PhysicsDirectBodyState3D) -> void:
+	if not is_colliding():
+		_contact_velocity = Vector3.ZERO
+		_wheel_load = 0.0
+		return
+
 	var contact_point := get_collision_point()
 	_contact_velocity = vehicle_state.get_velocity_at_local_position(contact_point - vehicle_state.transform.origin)
 
@@ -91,13 +96,10 @@ func apply_suspension_force(vehicle_state : PhysicsDirectBodyState3D) -> void:
 
 func apply_bottom_out_force(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
 	var up := global_transform.basis.y
-	var wheel_velocity_along_spring := _contact_velocity.dot(up)
-	if wheel_velocity_along_spring < 0.0:
-		# TODO: compute impulse so that it compensates for the invalid position and angular velocity
-		#       instead of only stopping the linear velocity
-		var bottom_out_impulse := -virtual_mass * wheel_velocity_along_spring * up
-		var impulse_position := get_collision_point() - vehicle_state.transform.origin
-		vehicle_state.apply_force(bottom_out_impulse / vehicle_state.step, impulse_position)
+	var excess_linear_velocity := maxf(0.0, -_contact_velocity.dot(up))
+	var force := virtual_mass * excess_linear_velocity / vehicle_state.step * up
+	var force_position := get_collision_point() - vehicle_state.transform.origin
+	vehicle_state.apply_force(force, force_position)
 
 
 func apply_drive_forces(vehicle_state : PhysicsDirectBodyState3D) -> void:

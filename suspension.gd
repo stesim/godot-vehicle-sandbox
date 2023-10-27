@@ -11,7 +11,7 @@ extends Resource
 @export var damping := 4000.0
 
 
-func calculate_force(_vehicle_state : PhysicsDirectBodyState3D, wheel : Wheel) -> float:
+func calculate_force(vehicle_state : PhysicsDirectBodyState3D, wheel : Wheel) -> float:
 	if not wheel.is_colliding():
 		return 0.0
 
@@ -25,5 +25,10 @@ func calculate_force(_vehicle_state : PhysicsDirectBodyState3D, wheel : Wheel) -
 		effective_stiffness *= stiffness_curve.sample_baked(-spring_displacement / rest_length)
 
 	var displacement_velocity := wheel.get_contact_velocity().dot(up)
+	var max_displacement_velocity := rest_length / vehicle_state.step
+	# HACK: avoid excessive forces due to large displacement velocities
+	if absf(displacement_velocity) > max_displacement_velocity:
+		displacement_velocity = signf(displacement_velocity) * max_displacement_velocity
 	var force := -effective_stiffness * spring_displacement - damping * displacement_velocity
-	return force
+	# HACK: avoid negative force
+	return maxf(0.0, force)

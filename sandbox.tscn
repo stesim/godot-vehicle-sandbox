@@ -44,7 +44,7 @@ gear_ratios = Array[float]([-3.42, 0.0, 4.38, 2.86, 1.92, 1.36, 1.0, 0.82, 0.73]
 neutral_gear = 1
 axle_ratio = 3.75
 shift_time = 0.25
-gear = 0
+gear = 2
 torque_input = 0.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3u1rk"]
@@ -640,7 +640,7 @@ camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehic
 script = ExtResource("2_eqkow")
 
 [node name="vehicle" type="RigidBody3D" parent="." node_paths=PackedStringArray("wheels", "motor_audio_controller", "wheel_audio_controller")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.460675, 0.813854, 48.4579)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.460675, 0.361103, 48.4579)
 mass = 2500.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, 0.2, 0)

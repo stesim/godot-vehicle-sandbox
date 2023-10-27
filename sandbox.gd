@@ -3,6 +3,8 @@ extends Node3D
 
 @export var camera_crane : CameraCrane
 
+@export var camera_view := 0
+
 @export var camera_views : Array[Node3D] = []
 
 
@@ -16,7 +18,7 @@ extends Node3D
 
 
 func _ready() -> void:
-	camera_crane.snap_to_position(camera_views[0])
+	camera_crane.snap_to_position(camera_views[camera_view])
 
 
 func _unhandled_input(event : InputEvent) -> void:
