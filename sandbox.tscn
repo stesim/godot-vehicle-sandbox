@@ -72,7 +72,7 @@ torque_feedback_2 = 0.0
 resource_name = "center differential"
 script = ExtResource("6_2gjax")
 limited_slip_ratio = 1.4
-is_locked = false
+is_locked = true
 torque_split = 0.4
 velocity_input = 0.0
 torque_input = 0.0
@@ -688,7 +688,7 @@ camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehic
 script = ExtResource("2_eqkow")
 
 [node name="vehicle" type="RigidBody3D" parent="." node_paths=PackedStringArray("wheels", "motor_audio_controller", "wheel_audio_controller")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 113.73, 0.25, 107.235)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.9451, 0.25, 115.245)
 mass = 2500.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, 0.2, 0)
@@ -1035,7 +1035,7 @@ shape = SubResource("BoxShape3D_av3ol")
 mesh = SubResource("BoxMesh_hatsg")
 
 [node name="obstacle3" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.94824, -0.317552, 0, 0.317552, 0.94824, -32, 0, -6)
+transform = Transform3D(1, 0, 0, 0, 0.94824, -0.317552, 0, 0.317552, 0.94824, -16, 0, 7.205)
 
 [node name="shape" type="CollisionShape3D" parent="obstacle3"]
 shape = SubResource("BoxShape3D_hc81o")
@@ -1044,7 +1044,7 @@ shape = SubResource("BoxShape3D_hc81o")
 mesh = SubResource("BoxMesh_0oeik")
 
 [node name="obstacle8" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.824264, -0.566204, 0, 0.566204, 0.824264, -16, 3.5, -12)
+transform = Transform3D(1, 0, 0, 0, 0.824264, -0.566204, 0, 0.566204, 0.824264, -24, 9, -12)
 
 [node name="shape" type="CollisionShape3D" parent="obstacle8"]
 shape = SubResource("BoxShape3D_hc81o")
