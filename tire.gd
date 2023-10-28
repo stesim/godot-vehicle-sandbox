@@ -47,11 +47,10 @@ func calculate_traction(vehicle_state : PhysicsDirectBodyState3D, wheel : Wheel,
 	elif traction.x / traction_limits.x > 1.0:
 		traction.x = traction_limits.x
 
-	#print("%s: %.2f / %.2f" % [name, traction.y, traction_limits.y])
-	#if traction.y / traction_limits.y < 0.0:
-	#	traction.y = 0.0
-	#elif traction.y / traction_limits.y > 1.0:
-	#	traction.y = traction_limits.y
+	if traction.y / traction_limits.y < 0.0:
+		traction.y = 0.0
+	elif traction.y / traction_limits.y > 1.0:
+		traction.y = traction_limits.y
 
 	return traction
 
@@ -76,8 +75,8 @@ func _calculate_traction_limits(vehicle_state : PhysicsDirectBodyState3D, wheel 
 	var force_position := wheel.get_collision_point() - vehicle_state.transform.origin
 
 	var dv_rotation := -vehicle_state.step * wheel.radius * wheel.radius / wheel.get_effective_inertia()
-	var dv_contact_x := vehicle_state.step * (vehicle_state.inverse_mass + (vehicle_state.inverse_inertia_tensor * forward.cross(force_position)).cross(force_position).dot(forward))
-	var dv_contact_y := vehicle_state.step * (vehicle_state.inverse_mass + (vehicle_state.inverse_inertia_tensor * right.cross(force_position)).cross(force_position).dot(right))
+	var dv_contact_x := vehicle_state.step * (vehicle_state.inverse_mass + (vehicle_state.inverse_inertia_tensor * force_position.cross(forward)).cross(force_position).dot(forward))
+	var dv_contact_y := vehicle_state.step * (vehicle_state.inverse_mass + (vehicle_state.inverse_inertia_tensor * force_position.cross(right)).cross(force_position).dot(right))
 
 	var traction_force_limits := Vector2(
 		-slip.x / (dv_rotation - dv_contact_x) - vehicle_state.total_gravity.dot(forward),
