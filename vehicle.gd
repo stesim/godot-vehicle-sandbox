@@ -10,6 +10,12 @@ extends RigidBody3D
 
 @export var auto_brake_threshold := 0.25
 
+@export var frontal_area := 2.3
+
+@export var drag_coefficient := 0.3
+
+@export var air_density := 1.204
+
 @export var motor : Motor
 
 @export var transmission : Transmission
@@ -51,6 +57,7 @@ func _integrate_forces(state : PhysicsDirectBodyState3D) -> void:
 	_apply_drive_input(state.step)
 	_apply_suspension_forces(state)
 	_apply_tire_forces(state)
+	_apply_drag(state)
 
 
 func _unhandled_input(event : InputEvent) -> void:
@@ -166,16 +173,19 @@ func _apply_steering_input() -> void:
 		return
 
 	var turn_center := _calculate_turn_center()
-	_apply_ackermann_steering(turn_center, steering_angle)
-
-
-func _apply_ackermann_steering(turn_center : Vector3, steering_angle : float) -> void:
 	for wheel in wheels:
 		if wheel.is_steering:
 			var turn_center_offset := wheel.position - turn_center
 			var turn_radius := -turn_center_offset.z / tan(steering_angle)
 			var ackermann_angle = atan(-turn_center_offset.z / (turn_radius + turn_center_offset.x))
 			wheel.steering_angle = ackermann_angle
+
+
+func _apply_drag(state : PhysicsDirectBodyState3D) -> void:
+	var forward := -state.transform.basis.z
+	var longitudinal_velocity := state.linear_velocity.dot(forward)
+	var drag_force := 0.5 * air_density * longitudinal_velocity * longitudinal_velocity * drag_coefficient * frontal_area
+	state.apply_central_force(-drag_force * forward)
 
 
 func _calculate_turn_center() -> Vector3:
