@@ -103,7 +103,7 @@ func _update_inputs(delta : float) -> void:
 
 
 func _apply_drive_input(delta : float) -> void:
-	motor.throttle = _engine_input
+	motor.throttle = _engine_input if not transmission.is_shifting() else 0.0
 
 	var gear_ratio := transmission.get_current_gear_ratio()
 	motor.is_engaged = not is_zero_approx(gear_ratio)
