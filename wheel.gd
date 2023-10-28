@@ -49,8 +49,6 @@ var _torque_feedback := 0.0
 func _ready() -> void:
 	target_position.y = -(suspension.rest_length + radius)
 
-	suspension = suspension.duplicate()
-
 
 func get_angular_velocity() -> float:
 	return _angular_velocity
