@@ -2,6 +2,12 @@ class_name Wheel
 extends RayCast3D
 
 
+@export var is_driven := false
+
+@export var is_steering := false
+
+@export var has_handbrake := false
+
 @export var visuals : Node3D
 
 @export var radius := 0.4
@@ -16,11 +22,7 @@ extends RayCast3D
 
 @export_subgroup("Input")
 
-@export var is_driven := false
-
 @export var drive_torque := 0.0
-
-@export var is_steering := false
 
 @export var steering_angle : float :
 	get:
@@ -30,7 +32,7 @@ extends RayCast3D
 
 @export var brake_torque := 0.0
 
-@export var has_handbrake := false
+@export var drivetrain_inertia := 0.0
 
 
 var _wheel_load := 0.0
@@ -40,6 +42,8 @@ var _contact_velocity := Vector3.ZERO
 var _angular_velocity := 0.0
 
 var _slip := Vector2.ZERO
+
+var _torque_feedback := 0.0
 
 
 func _ready() -> void:
@@ -66,6 +70,14 @@ func get_contact_velocity() -> Vector3:
 
 func get_wheel_load() -> float:
 	return _wheel_load
+
+
+func get_torque_feedback() -> float:
+	return _torque_feedback
+
+
+func get_effective_inertia() -> float:
+	return inertia + drivetrain_inertia
 
 
 func is_bottoming_out() -> bool:
@@ -103,9 +115,11 @@ func apply_bottom_out_force(vehicle_state : PhysicsDirectBodyState3D, virtual_ma
 
 
 func apply_drive_forces(vehicle_state : PhysicsDirectBodyState3D) -> void:
+	_torque_feedback = 0.0
+
 	var applied_brake_torque := 0.0
 
-	_angular_velocity += vehicle_state.step * drive_torque / inertia
+	_angular_velocity += vehicle_state.step * drive_torque / get_effective_inertia()
 	var drive_brake_torque := -signf(_angular_velocity) * brake_torque - applied_brake_torque
 	applied_brake_torque += _apply_brake_torque(drive_brake_torque, vehicle_state.step)
 
@@ -127,7 +141,8 @@ func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, applied_brake_
 	var traction := tire.calculate_traction(vehicle_state, self, applied_brake_torque)
 
 	var feedback_torque := -traction.x * radius
-	_angular_velocity += vehicle_state.step * feedback_torque / inertia
+	_angular_velocity += vehicle_state.step * feedback_torque / get_effective_inertia()
+	_torque_feedback += feedback_torque
 
 	var traction_force := traction.x * forward + traction.y * right
 	var force_position := get_collision_point() - vehicle_state.transform.origin
@@ -137,13 +152,15 @@ func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, applied_brake_
 
 
 func _apply_brake_torque(torque : float, delta : float) -> float:
-	var brake_torque_limit := -_angular_velocity * inertia / delta
+	var effective_inertia := get_effective_inertia()
+	var brake_torque_limit := -_angular_velocity * effective_inertia / delta
 	var ratio := torque / brake_torque_limit
 	if ratio < 0.0:
 		torque = 0.0
 	elif ratio > 1.0:
 		torque = brake_torque_limit
-	_angular_velocity += delta * torque / inertia
+	_angular_velocity += delta * torque / effective_inertia
+	_torque_feedback += torque
 	return torque
 
 

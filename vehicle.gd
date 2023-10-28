@@ -14,6 +14,12 @@ extends RigidBody3D
 
 @export var transmission : Transmission
 
+@export var front_differential : Differential
+
+@export var center_differential : Differential
+
+@export var rear_differential : Differential
+
 @export var wheels : Array[Wheel] = []
 
 @export var input_speed := 6.0
@@ -84,21 +90,16 @@ func _update_inputs(delta : float) -> void:
 
 
 func _apply_drive_input(delta : float) -> void:
-	var num_driven_wheels := 0
 	var brake_torque := 0.0
 	var handbrake_torque := _handbrake_input * max_handbrake_torque
-
-	for wheel in wheels:
-		if wheel.is_driven:
-			num_driven_wheels += 1
 
 	motor.throttle = _engine_input
 	brake_torque = _brake_input * max_brake_torque
 
-	if transmission.gear == transmission.neutral_gear:
-		motor.rpm_feedback = -1.0
-	else:
-		var gear_ratio := transmission.get_current_gear_ratio()
+	var gear_ratio := transmission.get_current_gear_ratio()
+	motor.rpm_feedback = 0.0
+	motor.is_engaged = not is_zero_approx(gear_ratio)
+	if motor.is_engaged:
 		var feedback_rpm := INF
 		for wheel in wheels:
 			if wheel.is_driven:
@@ -109,11 +110,51 @@ func _apply_drive_input(delta : float) -> void:
 	transmission.torque_input = motor.get_torque_output()
 	transmission.update(delta)
 
-	var wheel_torque := transmission.get_torque_output() / num_driven_wheels if num_driven_wheels > 0 else 0.0
+	if motor.is_engaged:
+		# HACK: assumes wheel positions and 4-wheel drive
+		var feedback_fl := wheels[0].get_torque_feedback()
+		var feedback_fr := wheels[1].get_torque_feedback()
+		var feedback_rl := wheels[2].get_torque_feedback()
+		var feedback_rr := wheels[3].get_torque_feedback()
+
+		var front_feedback := feedback_fl + feedback_fr
+		var rear_feedback := feedback_rl + feedback_rr
+
+		center_differential.torque_input = transmission.get_torque_output()
+		center_differential.velocity_feedback_1 = 0.5 * (wheels[2].get_angular_velocity() + wheels[3].get_angular_velocity())
+		center_differential.velocity_feedback_2 = 0.5 * (wheels[0].get_angular_velocity() + wheels[1].get_angular_velocity())
+		center_differential.torque_feedback_1 = rear_feedback
+		center_differential.torque_feedback_2 = front_feedback
+		center_differential.update()
+
+		rear_differential.torque_input = center_differential.get_torque_output_1()
+		rear_differential.velocity_feedback_1 = wheels[2].get_angular_velocity()
+		rear_differential.velocity_feedback_2 = wheels[3].get_angular_velocity()
+		rear_differential.torque_feedback_1 = feedback_rl
+		rear_differential.torque_feedback_2 = feedback_rr
+		rear_differential.update()
+
+		front_differential.torque_input = center_differential.get_torque_output_2()
+		front_differential.velocity_feedback_1 = wheels[0].get_angular_velocity()
+		front_differential.velocity_feedback_2 = wheels[1].get_angular_velocity()
+		front_differential.torque_feedback_1 = feedback_fl
+		front_differential.torque_feedback_2 = feedback_fr
+		front_differential.update()
+
+		wheels[0].drive_torque = front_differential.get_torque_output_1()
+		wheels[1].drive_torque = front_differential.get_torque_output_2()
+		wheels[2].drive_torque = rear_differential.get_torque_output_1()
+		wheels[3].drive_torque = rear_differential.get_torque_output_2()
+	else:
+		wheels[0].drive_torque = 0.0
+		wheels[1].drive_torque = 0.0
+		wheels[2].drive_torque = 0.0
+		wheels[3].drive_torque = 0.0
+
 	for wheel in wheels:
 		wheel.brake_torque = maxf(brake_torque, handbrake_torque) if wheel.has_handbrake else brake_torque
 		if wheel.is_driven:
-			wheel.drive_torque = wheel_torque
+			wheel.drivetrain_inertia = absf(gear_ratio) * motor.inertia
 
 
 func _apply_steering_input() -> void:
@@ -154,18 +195,8 @@ func _update_audio() -> void:
 
 
 func _update_motor_audio() -> void:
-	if motor_audio_controller == null:
-		return
-
-	var wheel_angular_velocity := INF
-	for wheel in wheels:
-		if wheel.is_driven:
-			wheel_angular_velocity = minf(
-				wheel_angular_velocity,
-				absf(wheel.get_angular_velocity())
-			)
-
-	motor_audio_controller.rpm = motor.rpm
+	if motor_audio_controller != null:
+		motor_audio_controller.rpm = motor.rpm
 
 
 func _update_wheel_audio() -> void:

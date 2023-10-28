@@ -1,4 +1,4 @@
-[gd_scene load_steps=81 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=86 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Script" path="res://sandbox.gd" id="1_nf78t"]
 [ext_resource type="Script" path="res://game_controller.gd" id="2_eqkow"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://tire_audio_controller.gd" id="5_d2c43"]
 [ext_resource type="AudioStream" uid="uid://bt4wa6p377qf6" path="res://assets/sounds/tires_squal_loop.wav" id="5_l7lxq"]
 [ext_resource type="Script" path="res://camera.gd" id="5_no0k6"]
+[ext_resource type="Script" path="res://differential.gd" id="6_2gjax"]
 [ext_resource type="PackedScene" uid="uid://dwe133wihy5oc" path="res://smoke_particles.tscn" id="6_02ux7"]
 [ext_resource type="AudioStream" uid="uid://cc0jrsvptngww" path="res://assets/sounds/motor-loop-2-103532.wav" id="6_cnggs"]
 [ext_resource type="Script" path="res://skid_smoke_controller.gd" id="7_5wx1i"]
@@ -20,6 +21,10 @@
 [ext_resource type="Script" path="res://camera_crane.gd" id="10_w6w1k"]
 [ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://assets/textures/texture_07.png" id="14_ejoip"]
 
+[sub_resource type="Curve" id="Curve_dj5nd"]
+_data = [Vector2(0, 0), 0.0, 0.5, 0, 1, Vector2(1, 0.5), 0.5, 0.0, 1, 0]
+point_count = 2
+
 [sub_resource type="Curve" id="Curve_dce3y"]
 _data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.239521, 1), 1.35572, 0.0, 0, 0, Vector2(0.930107, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.463158), 0.0, 0.0, 0, 0]
 point_count = 4
@@ -28,15 +33,18 @@ point_count = 4
 script = ExtResource("3_ua26l")
 idle_rpm = 800.0
 rpm_limit = 5000.0
+rpm_limiter_cutoff_time = 0.1
 peak_torque = 600.0
 normalization_rpm = 5000.0
-normalized_torque_curve = SubResource("Curve_dce3y")
+power_torque_curve = SubResource("Curve_dce3y")
+brake_torque_curve = SubResource("Curve_dj5nd")
 throttle_response_torque = 800.0
 friction_torque = 150.0
 inertia = 1.0
 throttle = 0.0
 rpm = 0.0
-rpm_feedback = -1.0
+rpm_feedback = 0.0
+is_engaged = false
 
 [sub_resource type="Resource" id="Resource_4i8ft"]
 script = ExtResource("4_bjpg6")
@@ -46,6 +54,45 @@ axle_ratio = 3.75
 shift_time = 0.25
 gear = 2
 torque_input = 0.0
+
+[sub_resource type="Resource" id="Resource_7k4r8"]
+resource_name = "front differential"
+script = ExtResource("6_2gjax")
+limited_slip_ratio = 1.4
+is_locked = false
+torque_split = 0.5
+velocity_input = 0.0
+torque_input = 0.0
+velocity_feedback_1 = 0.0
+velocity_feedback_2 = 0.0
+torque_feedback_1 = 0.0
+torque_feedback_2 = 0.0
+
+[sub_resource type="Resource" id="Resource_k35yf"]
+resource_name = "center differential"
+script = ExtResource("6_2gjax")
+limited_slip_ratio = 1.4
+is_locked = false
+torque_split = 0.5
+velocity_input = 0.0
+torque_input = 0.0
+velocity_feedback_1 = 0.0
+velocity_feedback_2 = 0.0
+torque_feedback_1 = 0.0
+torque_feedback_2 = 0.0
+
+[sub_resource type="Resource" id="Resource_t6ylp"]
+resource_name = "rear differential"
+script = ExtResource("6_2gjax")
+limited_slip_ratio = 1.4
+is_locked = false
+torque_split = 0.5
+velocity_input = 0.0
+torque_input = 0.0
+velocity_feedback_1 = 0.0
+velocity_feedback_2 = 0.0
+torque_feedback_1 = 0.0
+torque_feedback_2 = 0.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3u1rk"]
 size = Vector3(1.87018, 0.769409, 4.46075)
@@ -598,7 +645,7 @@ _data = [Vector2(0, 0), 0.16681, 0.173796, 0, 0, Vector2(1, 1), 1.87193, 0.0, 0,
 point_count = 2
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qvu1f"]
-size = Vector3(128, 1, 128)
+size = Vector3(256, 1, 256)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gdeoi"]
 albedo_texture = ExtResource("14_ejoip")
@@ -606,7 +653,7 @@ uv1_triplanar = true
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_8tg30"]
 material = SubResource("StandardMaterial3D_gdeoi")
-size = Vector2(128, 128)
+size = Vector2(256, 256)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_av3ol"]
 
@@ -640,16 +687,20 @@ camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehic
 script = ExtResource("2_eqkow")
 
 [node name="vehicle" type="RigidBody3D" parent="." node_paths=PackedStringArray("wheels", "motor_audio_controller", "wheel_audio_controller")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.460675, 0.361103, 48.4579)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 113.73, 0.361103, 107.235)
 mass = 2500.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, 0.2, 0)
 can_sleep = false
+linear_damp_mode = 1
 script = ExtResource("2_juwt1")
 max_brake_torque = 6000.0
 max_handbrake_torque = 2000.0
 motor = SubResource("Resource_i3gln")
 transmission = SubResource("Resource_4i8ft")
+front_differential = SubResource("Resource_7k4r8")
+center_differential = SubResource("Resource_k35yf")
+rear_differential = SubResource("Resource_t6ylp")
 wheels = [NodePath("wheel_fl"), NodePath("wheel_fr"), NodePath("wheel_rl"), NodePath("wheel_rr")]
 motor_audio_controller = NodePath("motor_sound/controller")
 wheel_audio_controller = NodePath("slide_sound/controller")
@@ -711,11 +762,11 @@ skeleton = NodePath("")
 [node name="wheel_fl" type="RayCast3D" parent="vehicle" node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, -1.45)
 script = ExtResource("2_yic85")
+is_driven = true
+is_steering = true
 visuals = NodePath("visuals")
 suspension = SubResource("Resource_htyri")
 tire = SubResource("Resource_hkimi")
-is_driven = true
-is_steering = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_fl"]
 transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, 0, 0, 0)
@@ -742,11 +793,11 @@ smoke = NodePath("..")
 [node name="wheel_fr" type="RayCast3D" parent="vehicle" node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, -1.45)
 script = ExtResource("2_yic85")
+is_driven = true
+is_steering = true
 visuals = NodePath("visuals")
 suspension = SubResource("Resource_htyri")
 tire = SubResource("Resource_hkimi")
-is_driven = true
-is_steering = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_fr"]
 transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0, 0, 0)
@@ -773,11 +824,11 @@ smoke = NodePath("..")
 [node name="wheel_rl" type="RayCast3D" parent="vehicle" node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, 1.45)
 script = ExtResource("2_yic85")
+is_driven = true
+has_handbrake = true
 visuals = NodePath("visuals")
 suspension = SubResource("Resource_htyri")
 tire = SubResource("Resource_hkimi")
-is_driven = true
-has_handbrake = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_rl"]
 transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, 0, 0, 0)
@@ -804,11 +855,11 @@ smoke = NodePath("..")
 [node name="wheel_rr" type="RayCast3D" parent="vehicle" node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, 1.45)
 script = ExtResource("2_yic85")
+is_driven = true
+has_handbrake = true
 visuals = NodePath("visuals")
 suspension = SubResource("Resource_htyri")
 tire = SubResource("Resource_hkimi")
-is_driven = true
-has_handbrake = true
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_rr"]
 transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0, 0, 0)
@@ -894,6 +945,36 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_qvu1f")
 
 [node name="mesh" type="MeshInstance3D" parent="ground"]
+mesh = SubResource("PlaneMesh_8tg30")
+
+[node name="ground2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.999999, 0, 0, -256)
+
+[node name="shape" type="CollisionShape3D" parent="ground2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_qvu1f")
+
+[node name="mesh" type="MeshInstance3D" parent="ground2"]
+mesh = SubResource("PlaneMesh_8tg30")
+
+[node name="ground3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.999999, 0, 0, -512)
+
+[node name="shape" type="CollisionShape3D" parent="ground3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_qvu1f")
+
+[node name="mesh" type="MeshInstance3D" parent="ground3"]
+mesh = SubResource("PlaneMesh_8tg30")
+
+[node name="ground4" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.999999, 0, 0, -768)
+
+[node name="shape" type="CollisionShape3D" parent="ground4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_qvu1f")
+
+[node name="mesh" type="MeshInstance3D" parent="ground4"]
 mesh = SubResource("PlaneMesh_8tg30")
 
 [node name="obstacle" type="StaticBody3D" parent="."]
@@ -1041,3 +1122,42 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.705882, 0.705882, 0.705882, 1)
 text = "1/min"
+
+[node name="slip_info" type="GridContainer" parent="hud"]
+unique_name_in_owner = true
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -130.0
+offset_top = -240.0
+offset_right = 130.0
+offset_bottom = -184.0
+grow_horizontal = 2
+grow_vertical = 0
+columns = 2
+
+[node name="Label" type="Label" parent="hud/slip_info"]
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+text = "0.0"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="hud/slip_info"]
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+text = "0.0"
+horizontal_alignment = 1
+
+[node name="Label3" type="Label" parent="hud/slip_info"]
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+text = "0.0"
+horizontal_alignment = 1
+
+[node name="Label4" type="Label" parent="hud/slip_info"]
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+text = "0.0"
+horizontal_alignment = 1

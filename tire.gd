@@ -75,7 +75,7 @@ func _calculate_grip(slip : Vector2, contact_velocity : Vector2) -> Vector2:
 func _calculate_traction_limits(vehicle_state : PhysicsDirectBodyState3D, wheel : Wheel, slip : Vector2, forward : Vector3, right : Vector3) -> Vector2:
 	var force_position := wheel.get_collision_point() - vehicle_state.transform.origin
 
-	var dv_rotation := -vehicle_state.step * wheel.radius * wheel.radius / wheel.inertia
+	var dv_rotation := -vehicle_state.step * wheel.radius * wheel.radius / wheel.get_effective_inertia()
 	var dv_contact_x := vehicle_state.step * (vehicle_state.inverse_mass + (vehicle_state.inverse_inertia_tensor * forward.cross(force_position)).cross(force_position).dot(forward))
 	var dv_contact_y := vehicle_state.step * (vehicle_state.inverse_mass + (vehicle_state.inverse_inertia_tensor * right.cross(force_position)).cross(force_position).dot(right))
 

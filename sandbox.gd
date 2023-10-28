@@ -16,6 +16,8 @@ extends Node3D
 
 @onready var _rpm_label : Label = %rpm_label
 
+@onready var _slip_info := %slip_info
+
 
 func _ready() -> void:
 	camera_crane.snap_to_position(camera_views[camera_view])
@@ -31,6 +33,8 @@ func _process(_delta : float) -> void:
 	var gear := _vehicle.transmission.gear - _vehicle.transmission.neutral_gear
 	_gear_label.text = "--" if _vehicle.transmission.is_shifting() else "N" if gear == 0 else "R" if gear < 0 else "D" + str(gear)
 	_rpm_label.text = str(int(_vehicle.motor.rpm))
+	for i in _vehicle.wheels.size():
+		_slip_info.get_child(i).text = "%+.2f" % _vehicle.wheels[i].get_slip_velocity().x
 
 
 func _cycle_camera_view() -> void:
