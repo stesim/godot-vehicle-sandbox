@@ -21,8 +21,14 @@ signal stopped()
 
 @export var vehicle : Vehicle
 
-@export var target_speeds : Array[float] = [80.0, 100.0, 160.0]
+@export var target_speeds : Array[float] = [100.0]
 
+@export var reference_times : Array[float] = [8.0]
+
+@export var trigger_speed := 0.01
+
+
+var _is_recording := false
 
 var _elapsed_time := 0.0
 
@@ -53,23 +59,26 @@ func _ready() -> void:
 
 
 func _physics_process(delta : float) -> void:
-	if target_speeds.is_empty():
-		return
 	var speed := vehicle.get_speed(Vehicle.KILOMETERS_PER_HOUR)
-	if speed < 0.01:
-		return
+	if not _is_recording and speed > trigger_speed:
+		_is_recording = true
+	var lower_threshold := target_speeds[_target_index - 1] if _target_index > 0 else trigger_speed
+	if _is_recording and speed < lower_threshold:
+		stop()
 
-	_elapsed_time += delta
+	if _is_recording:
+		_elapsed_time += delta
 
-	if speed >= target_speeds[_target_index]:
-		_results[_target_index] = _elapsed_time
-		time_recorded.emit(_target_index, _elapsed_time)
-		_target_index += 1
-		if _target_index >= target_speeds.size():
-			stop()
+		if speed >= target_speeds[_target_index]:
+			_results[_target_index] = _elapsed_time
+			time_recorded.emit(_target_index, _elapsed_time)
+			_target_index += 1
+			if _target_index >= target_speeds.size():
+				stop()
 
 
 func _reset() -> void:
+	_is_recording = false
 	_elapsed_time = 0.0
 	_target_index = 0
 	_results.resize(target_speeds.size())

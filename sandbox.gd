@@ -74,4 +74,6 @@ func _initialize_timer_interface() -> void:
 	_acceleration_timer.time_recorded.connect(func(index : int, value : float):
 		var time_label : Label = _acceleration_timer_interface.get_child(3 + 2 * index)
 		time_label.text = "%.1f" % value
+		if index < _acceleration_timer.reference_times.size():
+			time_label.text += " (%+.1f)" % (value - _acceleration_timer.reference_times[index])
 	)
