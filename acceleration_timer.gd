@@ -25,7 +25,7 @@ signal stopped()
 
 @export var reference_times : Array[float] = [8.0]
 
-@export var trigger_speed := 0.01
+@export var trigger_speed := 0.5
 
 
 var _is_recording := false

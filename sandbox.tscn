@@ -1,4 +1,4 @@
-[gd_scene load_steps=87 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=89 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Script" path="res://sandbox.gd" id="1_nf78t"]
 [ext_resource type="Script" path="res://game_controller.gd" id="2_eqkow"]
@@ -20,6 +20,7 @@
 [ext_resource type="Script" path="res://suspension.gd" id="8_ph7pb"]
 [ext_resource type="Script" path="res://camera_arm.gd" id="10_2ofnf"]
 [ext_resource type="Script" path="res://camera_crane.gd" id="10_w6w1k"]
+[ext_resource type="Script" path="res://brake.gd" id="12_l17kx"]
 [ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://assets/textures/texture_07.png" id="14_ejoip"]
 
 [sub_resource type="Curve" id="Curve_dj5nd"]
@@ -522,6 +523,11 @@ longitudinal_traction_curve_scale = Vector2(1, 1)
 lateral_traction_curve = SubResource("Curve_ov6qw")
 lateral_traction_curve_scale = Vector2(0.175, 1)
 
+[sub_resource type="Resource" id="Resource_1ei13"]
+script = ExtResource("12_l17kx")
+max_torque = 6000.0
+max_handbrake_torque = 2000.0
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l63hl"]
 resource_name = "Material.006"
 cull_mode = 2
@@ -702,8 +708,6 @@ center_of_mass = Vector3(0, 0.2, 0)
 can_sleep = false
 linear_damp_mode = 1
 script = ExtResource("2_juwt1")
-max_brake_torque = 6000.0
-max_handbrake_torque = 2000.0
 frontal_area = 3.16
 drag_coefficient = 0.533
 motor = SubResource("Resource_i3gln")
@@ -777,6 +781,7 @@ is_steering = true
 visuals = NodePath("visuals")
 suspension = SubResource("Resource_htyri")
 tire = SubResource("Resource_hkimi")
+brake = SubResource("Resource_1ei13")
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_fl"]
 transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, 0, 0, 0)
@@ -808,6 +813,7 @@ is_steering = true
 visuals = NodePath("visuals")
 suspension = SubResource("Resource_htyri")
 tire = SubResource("Resource_hkimi")
+brake = SubResource("Resource_1ei13")
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_fr"]
 transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0, 0, 0)
@@ -839,6 +845,7 @@ has_handbrake = true
 visuals = NodePath("visuals")
 suspension = SubResource("Resource_htyri")
 tire = SubResource("Resource_hkimi")
+brake = SubResource("Resource_1ei13")
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_rl"]
 transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, 0, 0, 0)
@@ -870,6 +877,7 @@ has_handbrake = true
 visuals = NodePath("visuals")
 suspension = SubResource("Resource_htyri")
 tire = SubResource("Resource_hkimi")
+brake = SubResource("Resource_1ei13")
 
 [node name="visuals" type="Node3D" parent="vehicle/wheel_rr"]
 transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0, 0, 0)

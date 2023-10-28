@@ -14,13 +14,19 @@ extends RayCast3D
 
 @export var inertia := 1.0
 
+@export var traction_control_slip_ratio_threshold := 0.2
+
 @export var suspension : Suspension
 
 @export var tire : Tire
 
+@export var brake : Brake
+
 @export var enforce_visual_bottom_out := true
 
 @export_subgroup("Input")
+
+@export var drivetrain_inertia := 0.0
 
 @export var drive_torque := 0.0
 
@@ -30,9 +36,11 @@ extends RayCast3D
 	set(value):
 		rotation.y = value
 
-@export var brake_torque := 0.0
+@export var brake_input := 0.0
 
-@export var drivetrain_inertia := 0.0
+@export var handbrake_input := 0.0
+
+@export var traction_control_enabled := true
 
 
 var _wheel_load := 0.0
@@ -40,6 +48,8 @@ var _wheel_load := 0.0
 var _contact_velocity := Vector3.ZERO
 
 var _angular_velocity := 0.0
+
+var _brake_torque := 0.0
 
 var _slip := Vector2.ZERO
 
@@ -114,19 +124,35 @@ func apply_bottom_out_force(vehicle_state : PhysicsDirectBodyState3D, virtual_ma
 
 func apply_drive_forces(vehicle_state : PhysicsDirectBodyState3D) -> void:
 	_torque_feedback = 0.0
+	_brake_torque = brake_input * brake.max_torque
+	if has_handbrake:
+		_brake_torque = maxf(_brake_torque, handbrake_input * brake.max_handbrake_torque)
+
+	if traction_control_enabled:
+		_apply_traction_control(vehicle_state)
 
 	var applied_brake_torque := 0.0
 
 	_angular_velocity += vehicle_state.step * drive_torque / get_effective_inertia()
-	var drive_brake_torque := -signf(_angular_velocity) * brake_torque - applied_brake_torque
+	var drive_brake_torque := -signf(_angular_velocity) * _brake_torque - applied_brake_torque
 	applied_brake_torque += _apply_brake_torque(drive_brake_torque, vehicle_state.step)
 
 	if is_colliding():
 		_apply_tire_forces(vehicle_state, applied_brake_torque)
-		var traction_brake_torque := -signf(_angular_velocity) * brake_torque - applied_brake_torque
+		var traction_brake_torque := -signf(_angular_velocity) * _brake_torque - applied_brake_torque
 		applied_brake_torque += _apply_brake_torque(traction_brake_torque, vehicle_state.step)
 	else:
 		_slip = Vector2.ZERO
+
+
+func apply_rolling_resistance(vehicle_state : PhysicsDirectBodyState3D) -> void:
+	var forward := -vehicle_state.transform.basis.z
+	var speed := vehicle_state.linear_velocity.dot(forward)
+	var force_limit := -speed / (vehicle_state.inverse_mass * vehicle_state.step)
+	var rolling_resistance := -signf(speed) * tire.rolling_resistance_coefficient * _wheel_load
+	if rolling_resistance / force_limit > 1.0:
+		rolling_resistance = force_limit
+	vehicle_state.apply_central_force(rolling_resistance * forward)
 
 
 func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, applied_brake_torque : float) -> void:
@@ -136,7 +162,7 @@ func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, applied_brake_
 
 	_slip = _calculate_slip(forward, right)
 
-	var traction := tire.calculate_traction(vehicle_state, self, applied_brake_torque)
+	var traction := tire.calculate_traction(vehicle_state, self, _brake_torque, applied_brake_torque)
 
 	var feedback_torque := -traction.x * radius
 	_angular_velocity += vehicle_state.step * feedback_torque / get_effective_inertia()
@@ -149,14 +175,17 @@ func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, applied_brake_
 	_slip = _calculate_slip(forward, right)
 
 
-func apply_rolling_resistance(vehicle_state : PhysicsDirectBodyState3D) -> void:
-	var forward := -vehicle_state.transform.basis.z
-	var speed := vehicle_state.linear_velocity.dot(forward)
-	var force_limit := -speed / (vehicle_state.inverse_mass * vehicle_state.step)
-	var rolling_resistance := -signf(speed) * tire.rolling_resistance_coefficient * _wheel_load
-	if rolling_resistance / force_limit > 1.0:
-		rolling_resistance = force_limit
-	vehicle_state.apply_central_force(rolling_resistance * forward)
+func _apply_traction_control(vehicle_state : PhysicsDirectBodyState3D) -> void:
+	var forward := get_collision_normal().cross(global_transform.basis.x).normalized()
+	var forward_velocity := _contact_velocity.dot(forward)
+	if absf(forward_velocity) < 0.1:
+		forward_velocity = signf(forward_velocity) * 0.1
+	var angular_velocity_threshold := (traction_control_slip_ratio_threshold + 1.0) * forward_velocity / radius
+	var excess_angular_velocity := _angular_velocity - angular_velocity_threshold
+	if signf(forward_velocity) * excess_angular_velocity > 0.0:
+		var required_torque := -excess_angular_velocity / vehicle_state.step * get_effective_inertia()
+		var resistive_torque := absf(required_torque)
+		_brake_torque = minf(_brake_torque + resistive_torque, brake.max_torque)
 
 
 func _apply_brake_torque(torque : float, delta : float) -> float:

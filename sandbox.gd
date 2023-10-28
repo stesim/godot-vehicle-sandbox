@@ -36,7 +36,7 @@ func _unhandled_input(event : InputEvent) -> void:
 	if event.is_action_pressed(&"change_camera"):
 		_cycle_camera_view()
 	if event.is_action_pressed(&"toggle_timer"):
-		_acceleration_timer.toggle()
+		_acceleration_timer.start()
 
 
 func _process(_delta : float) -> void:

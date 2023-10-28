@@ -9,10 +9,6 @@ const KILOMETERS_PER_HOUR := 3.6
 
 @export var max_steering_angle := deg_to_rad(30.0)
 
-@export var max_brake_torque := 4000.0
-
-@export var max_handbrake_torque := 1550.0
-
 @export var auto_brake_threshold := 0.25
 
 @export var frontal_area := 2.3
@@ -107,16 +103,14 @@ func _update_inputs(delta : float) -> void:
 
 
 func _apply_drive_input(delta : float) -> void:
-	var brake_torque := 0.0
-	var handbrake_torque := _handbrake_input * max_handbrake_torque
-
 	motor.throttle = _engine_input
-	brake_torque = _brake_input * max_brake_torque
 
 	var gear_ratio := transmission.get_current_gear_ratio()
-	motor.rpm_feedback = 0.0
 	motor.is_engaged = not is_zero_approx(gear_ratio)
-	if motor.is_engaged:
+
+	if not motor.is_engaged:
+		motor.rpm_feedback = 0.0
+	else:
 		var feedback_rpm := INF
 		for wheel in wheels:
 			if wheel.is_driven:
@@ -169,7 +163,8 @@ func _apply_drive_input(delta : float) -> void:
 		wheels[3].drive_torque = 0.0
 
 	for wheel in wheels:
-		wheel.brake_torque = maxf(brake_torque, handbrake_torque) if wheel.has_handbrake else brake_torque
+		wheel.brake_input = _brake_input
+		wheel.handbrake_input = _handbrake_input
 		if wheel.is_driven:
 			wheel.drivetrain_inertia = absf(gear_ratio) * motor.inertia
 
