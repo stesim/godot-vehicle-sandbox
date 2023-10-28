@@ -28,7 +28,7 @@ _data = [Vector2(0, 0), 0.0, 0.5, 0, 1, Vector2(1, 0.5), 0.5, 0.0, 1, 0]
 point_count = 2
 
 [sub_resource type="Curve" id="Curve_dce3y"]
-_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.2, 0.8), 3.3011, 3.3011, 0, 0, Vector2(0.239521, 1), 5.0606, 0.0, 1, 0, Vector2(0.64, 1), 0.0, 0.0, 0, 0, Vector2(0.94, 0.463), -1.79, 0.0, 1, 0]
+_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.2, 0.8), 3.3011, 3.3011, 0, 0, Vector2(0.239521, 1), 5.0606, 0.0, 1, 0, Vector2(0.64, 1), 0.0, 0.0, 0, 0, Vector2(0.92, 0.679), -1.32348, 0.0, 0, 0]
 point_count = 5
 
 [sub_resource type="Resource" id="Resource_i3gln"]
