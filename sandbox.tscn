@@ -26,15 +26,15 @@ _data = [Vector2(0, 0), 0.0, 0.5, 0, 1, Vector2(1, 0.5), 0.5, 0.0, 1, 0]
 point_count = 2
 
 [sub_resource type="Curve" id="Curve_dce3y"]
-_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.239521, 1), 1.35572, 0.0, 0, 0, Vector2(0.930107, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.463158), 0.0, 0.0, 0, 0]
-point_count = 4
+_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.2, 0.8), 3.3011, 3.3011, 0, 0, Vector2(0.239521, 1), 5.0606, 0.0, 1, 0, Vector2(0.64, 1), 0.0, 0.0, 0, 0, Vector2(0.94, 0.463), -1.79, 0.0, 1, 0]
+point_count = 5
 
 [sub_resource type="Resource" id="Resource_i3gln"]
 script = ExtResource("3_ua26l")
 idle_rpm = 800.0
-rpm_limit = 5000.0
+rpm_limit = 4600.0
 rpm_limiter_cutoff_time = 0.1
-peak_torque = 600.0
+peak_torque = 700.0
 normalization_rpm = 5000.0
 power_torque_curve = SubResource("Curve_dce3y")
 brake_torque_curve = SubResource("Curve_dj5nd")
@@ -48,9 +48,9 @@ is_engaged = false
 
 [sub_resource type="Resource" id="Resource_4i8ft"]
 script = ExtResource("4_bjpg6")
-gear_ratios = Array[float]([-3.42, 0.0, 4.38, 2.86, 1.92, 1.36, 1.0, 0.82, 0.73])
+gear_ratios = Array[float]([-4.798, 0.0, 5.354, 3.243, 2.252, 1.636, 1.211, 1.0, 0.865, 0.717, 0.601])
 neutral_gear = 1
-axle_ratio = 3.75
+axle_ratio = 3.273
 shift_time = 0.25
 gear = 2
 torque_input = 0.0
@@ -73,7 +73,7 @@ resource_name = "center differential"
 script = ExtResource("6_2gjax")
 limited_slip_ratio = 1.4
 is_locked = false
-torque_split = 0.5
+torque_split = 0.4
 velocity_input = 0.0
 torque_input = 0.0
 velocity_feedback_1 = 0.0
@@ -95,7 +95,7 @@ torque_feedback_1 = 0.0
 torque_feedback_2 = 0.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3u1rk"]
-size = Vector3(1.87018, 0.769409, 4.46075)
+size = Vector3(1.87, 0.769, 4.5)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ms1xp"]
 size = Vector3(1.63821, 0.821474, 2.84861)
@@ -687,7 +687,7 @@ camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehic
 script = ExtResource("2_eqkow")
 
 [node name="vehicle" type="RigidBody3D" parent="." node_paths=PackedStringArray("wheels", "motor_audio_controller", "wheel_audio_controller")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 113.73, 0.361103, 107.235)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 113.73, 0.25, 107.235)
 mass = 2500.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, 0.2, 0)
@@ -706,7 +706,7 @@ motor_audio_controller = NodePath("motor_sound/controller")
 wheel_audio_controller = NodePath("slide_sound/controller")
 
 [node name="shape_1" type="CollisionShape3D" parent="vehicle"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.522, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.522, 0.0107269)
 shape = SubResource("BoxShape3D_3u1rk")
 
 [node name="shape_2" type="CollisionShape3D" parent="vehicle"]

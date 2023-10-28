@@ -29,7 +29,8 @@ func _unhandled_input(event : InputEvent) -> void:
 
 
 func _process(_delta : float) -> void:
-	_speed_label.text = str(int(_vehicle.linear_velocity.length() * 3.6))
+	var speed := absf(_vehicle.linear_velocity.dot(_vehicle.global_transform.basis.z))
+	_speed_label.text = str(int(speed * 3.6))
 	var gear := _vehicle.transmission.gear - _vehicle.transmission.neutral_gear
 	_gear_label.text = "--" if _vehicle.transmission.is_shifting() else "N" if gear == 0 else "R" if gear < 0 else "D" + str(gear)
 	_rpm_label.text = str(int(_vehicle.motor.rpm))
