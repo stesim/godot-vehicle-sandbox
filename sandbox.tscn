@@ -513,6 +513,7 @@ point_count = 4
 
 [sub_resource type="Resource" id="Resource_hkimi"]
 script = ExtResource("8_f8wy6")
+rolling_resistance_coefficient = 0.01
 friction_limit = 1.0
 magic_tweak_factor = 0.5
 longitudinal_traction_curve = SubResource("Curve_ibqg3")

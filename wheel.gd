@@ -149,6 +149,16 @@ func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, applied_brake_
 	_slip = _calculate_slip(forward, right)
 
 
+func apply_rolling_resistance(vehicle_state : PhysicsDirectBodyState3D) -> void:
+	var forward := -vehicle_state.transform.basis.z
+	var speed := vehicle_state.linear_velocity.dot(forward)
+	var force_limit := -speed / (vehicle_state.inverse_mass * vehicle_state.step)
+	var rolling_resistance := -signf(speed) * tire.rolling_resistance_coefficient * _wheel_load
+	if rolling_resistance / force_limit > 1.0:
+		rolling_resistance = force_limit
+	vehicle_state.apply_central_force(rolling_resistance * forward)
+
+
 func _apply_brake_torque(torque : float, delta : float) -> float:
 	var effective_inertia := get_effective_inertia()
 	var brake_torque_limit := -_angular_velocity * effective_inertia / delta

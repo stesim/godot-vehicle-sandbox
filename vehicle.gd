@@ -85,6 +85,7 @@ func _apply_suspension_forces(state : PhysicsDirectBodyState3D) -> void:
 func _apply_tire_forces(state : PhysicsDirectBodyState3D) -> void:
 	for wheel in wheels:
 		wheel.apply_drive_forces(state)
+		wheel.apply_rolling_resistance(state)
 
 
 func _update_inputs(delta : float) -> void:
