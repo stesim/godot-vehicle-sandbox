@@ -2,6 +2,11 @@ class_name Vehicle
 extends RigidBody3D
 
 
+const METERS_PER_SECOND := 1.0
+
+const KILOMETERS_PER_HOUR := 3.6
+
+
 @export var max_steering_angle := deg_to_rad(30.0)
 
 @export var max_brake_torque := 4000.0
@@ -42,6 +47,10 @@ var _steering_input := 0.0
 var _brake_input := 0.0
 
 var _handbrake_input := 0.0
+
+
+func get_speed(unit := METERS_PER_SECOND) -> float:
+	return -linear_velocity.dot(global_transform.basis.z) * unit
 
 
 func _ready() -> void:

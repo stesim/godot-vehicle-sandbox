@@ -1,10 +1,11 @@
-[gd_scene load_steps=86 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=87 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Script" path="res://sandbox.gd" id="1_nf78t"]
 [ext_resource type="Script" path="res://game_controller.gd" id="2_eqkow"]
 [ext_resource type="Script" path="res://vehicle.gd" id="2_juwt1"]
 [ext_resource type="Script" path="res://wheel.gd" id="2_yic85"]
 [ext_resource type="Texture2D" uid="uid://cb5g8miqmixlq" path="res://assets/mercedes_g_class/mercedes_benz_g-class_w263_0.png" id="3_r3m2b"]
+[ext_resource type="Script" path="res://acceleration_timer.gd" id="3_twb0k"]
 [ext_resource type="Script" path="res://motor.gd" id="3_ua26l"]
 [ext_resource type="Script" path="res://transmission.gd" id="4_bjpg6"]
 [ext_resource type="Script" path="res://motor_audio_controller.gd" id="5_3q0g4"]
@@ -687,6 +688,11 @@ camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehic
 [node name="controller" type="Node" parent="."]
 script = ExtResource("2_eqkow")
 
+[node name="acceleration_timer" type="Node" parent="." node_paths=PackedStringArray("vehicle")]
+script = ExtResource("3_twb0k")
+vehicle = NodePath("../vehicle")
+target_speeds = [50.0, 60.0, 80.0, 100.0, 120.0, 140.0, 160.0, 180.0]
+
 [node name="vehicle" type="RigidBody3D" parent="." node_paths=PackedStringArray("wheels", "motor_audio_controller", "wheel_audio_controller")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.9451, 0.25, 115.245)
 mass = 2500.0
@@ -1127,7 +1133,6 @@ theme_override_colors/font_color = Color(0.705882, 0.705882, 0.705882, 1)
 text = "1/min"
 
 [node name="slip_info" type="GridContainer" parent="hud"]
-unique_name_in_owner = true
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
@@ -1164,3 +1169,20 @@ custom_minimum_size = Vector2(128, 0)
 layout_mode = 2
 text = "0.0"
 horizontal_alignment = 1
+
+[node name="acceleration_timer" type="GridContainer" parent="hud"]
+offset_left = 32.0
+offset_top = 32.0
+offset_right = 127.0
+offset_bottom = 72.0
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="Label" type="Label" parent="hud/acceleration_timer"]
+layout_mode = 2
+text = "Speed"
+
+[node name="Label2" type="Label" parent="hud/acceleration_timer"]
+layout_mode = 2
+text = "Time"
