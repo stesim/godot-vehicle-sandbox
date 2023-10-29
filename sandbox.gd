@@ -41,8 +41,9 @@ func _unhandled_input(event : InputEvent) -> void:
 
 func _process(_delta : float) -> void:
 	_speed_label.text = str(absi(int(_vehicle.get_speed(Vehicle.KILOMETERS_PER_HOUR))))
-	var gear := _vehicle.transmission.gear - _vehicle.transmission.neutral_gear
-	_gear_label.text = "--" if _vehicle.transmission.is_shifting() else "N" if gear == 0 else "R" if gear < 0 else "D" + str(gear)
+	var gear := _vehicle.transmission.gear
+	_gear_label.text = "D" + str(gear) if gear > 0 else "R" if gear < 0 else "N"
+	_gear_label.modulate.a = 0.5 if _vehicle.transmission.is_shifting() else 1.0
 	_rpm_label.text = str(int(_vehicle.motor.rpm))
 	for i in _vehicle.wheels.size():
 		_slip_info.get_child(i).text = "%+.2f" % _vehicle.wheels[i].get_slip_velocity().x

@@ -29,7 +29,7 @@ extends Resource
 
 @export var rpm := 0.0 :
 	set(value):
-		rpm = clampf(value, idle_rpm, rpm_limit)
+		rpm = maxf(idle_rpm, value)
 
 @export var rpm_feedback := 0.0
 

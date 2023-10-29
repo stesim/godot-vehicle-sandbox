@@ -50,7 +50,7 @@ func get_speed(unit := METERS_PER_SECOND) -> float:
 
 
 func _ready() -> void:
-	pass
+	transmission.torque_curve = motor.power_torque_curve
 
 
 func _process(delta : float) -> void:
@@ -118,7 +118,9 @@ func _apply_drive_input(delta : float) -> void:
 		motor.rpm_feedback = feedback_rpm
 
 	motor.update(delta)
+
 	transmission.torque_input = motor.get_torque_output()
+	transmission.normalized_rpm_input = motor.rpm / motor.normalization_rpm
 	transmission.update(delta)
 
 	if motor.is_engaged:
