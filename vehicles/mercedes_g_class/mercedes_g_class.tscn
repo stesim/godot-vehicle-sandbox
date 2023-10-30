@@ -19,7 +19,7 @@
 [ext_resource type="Script" path="res://tire_audio_controller.gd" id="17_tabg7"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_3u1rk"]
-size = Vector3(1.87, 0.769, 4.5)
+size = Vector3(1.87, 0.769, 4.36868)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ms1xp"]
 size = Vector3(1.63821, 0.821474, 2.84861)
@@ -540,7 +540,6 @@ _data = [Vector2(0, 0), 0.16681, 0.173796, 0, 0, Vector2(1, 1), 1.87193, 0.0, 0,
 point_count = 2
 
 [node name="mercedes_g_class" type="RigidBody3D" node_paths=PackedStringArray("wheels", "motor_audio_controller", "wheel_audio_controller")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.9451, 0.467897, 115.245)
 mass = 2500.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, 0.2, 0)
@@ -559,7 +558,7 @@ motor_audio_controller = NodePath("motor_sound/controller")
 wheel_audio_controller = NodePath("slide_sound/controller")
 
 [node name="shape_1" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.522, 0.0107269)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.522, 0.0276535)
 shape = SubResource("BoxShape3D_3u1rk")
 
 [node name="shape_2" type="CollisionShape3D" parent="."]
@@ -615,9 +614,9 @@ skeleton = NodePath("")
 [node name="wheel_fl" type="RayCast3D" parent="." node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, -1.45)
 script = ExtResource("8_6bur0")
+visuals = NodePath("visuals")
 is_driven = true
 is_steering = true
-visuals = NodePath("visuals")
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")
@@ -647,9 +646,9 @@ smoke = NodePath("..")
 [node name="wheel_fr" type="RayCast3D" parent="." node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, -1.45)
 script = ExtResource("8_6bur0")
+visuals = NodePath("visuals")
 is_driven = true
 is_steering = true
-visuals = NodePath("visuals")
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")
@@ -679,9 +678,9 @@ smoke = NodePath("..")
 [node name="wheel_rl" type="RayCast3D" parent="." node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, 1.45)
 script = ExtResource("8_6bur0")
+visuals = NodePath("visuals")
 is_driven = true
 has_handbrake = true
-visuals = NodePath("visuals")
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")
@@ -711,9 +710,9 @@ smoke = NodePath("..")
 [node name="wheel_rr" type="RayCast3D" parent="." node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, 1.45)
 script = ExtResource("8_6bur0")
+visuals = NodePath("visuals")
 is_driven = true
 has_handbrake = true
-visuals = NodePath("visuals")
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")

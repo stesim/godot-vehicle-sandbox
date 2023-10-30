@@ -2,19 +2,19 @@ class_name Wheel
 extends RayCast3D
 
 
+@export var visuals : Node3D
+
 @export var is_driven := false
 
 @export var is_steering := false
 
 @export var has_handbrake := false
 
-@export var visuals : Node3D
+@export_range(0.0, 1.0, 0.01, "or_greater") var radius := 0.4
 
-@export var radius := 0.4
+@export_range(0.0, 2.0, 0.01, "or_greater") var inertia := 1.0
 
-@export var inertia := 1.0
-
-@export var traction_control_slip_ratio_threshold := 0.2
+@export_range(0.0, 1.0, 0.01, "or_greater") var traction_control_slip_ratio_threshold := 0.2
 
 @export var suspension : Suspension
 
@@ -26,19 +26,19 @@ extends RayCast3D
 
 @export_subgroup("Input")
 
-@export var drivetrain_inertia := 0.0
+@export_range(0.0, 4.0, 0.01, "or_greater") var drivetrain_inertia := 0.0
 
-@export var drive_torque := 0.0
+@export_range(0.0, 20000.0, 0.01, "or_greater") var drive_torque := 0.0
 
-@export var steering_angle : float :
+@export_range(-90.0, 90.0, 0.01, "radians") var steering_angle : float :
 	get:
 		return rotation.y
 	set(value):
 		rotation.y = value
 
-@export var brake_input := 0.0
+@export_range(0.0, 1.0) var brake_input := 0.0
 
-@export var handbrake_input := 0.0
+@export_range(0.0, 1.0) var handbrake_input := 0.0
 
 @export var traction_control_enabled := true
 

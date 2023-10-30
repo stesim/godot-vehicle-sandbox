@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=21 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Script" path="res://sandbox.gd" id="1_nf78t"]
 [ext_resource type="Script" path="res://game_controller.gd" id="2_eqkow"]
@@ -30,6 +30,16 @@ size = Vector3(16, 8, 24)
 [sub_resource type="BoxMesh" id="BoxMesh_0oeik"]
 size = Vector3(16, 8, 24)
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_jps17"]
+height = 16.0
+radius = 4.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_n7si7"]
+top_radius = 4.0
+bottom_radius = 4.0
+height = 16.0
+radial_segments = 32
+
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_lmsou"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
 ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -58,6 +68,7 @@ target_speeds = Array[float]([30.0, 60.0, 80.0, 100.0, 120.0, 140.0, 160.0, 180.
 reference_times = Array[float]([1.0, 2.6, 4.4, 6.6, 9.5, 13.6, 19.5, 30.5])
 
 [node name="vehicle" parent="." instance=ExtResource("4_80yr6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.0288, 0.467898, 47.099)
 
 [node name="camera_target" type="Node3D" parent="vehicle"]
 
@@ -197,6 +208,24 @@ shape = SubResource("BoxShape3D_hc81o")
 
 [node name="mesh" type="MeshInstance3D" parent="obstacle8"]
 mesh = SubResource("BoxMesh_0oeik")
+
+[node name="obstacle9" type="StaticBody3D" parent="."]
+transform = Transform3D(-4.37114e-08, -0.999999, 0, 1, -4.37113e-08, 0, 0, 0, 0.999999, 24, -2.99656, 0)
+
+[node name="shape" type="CollisionShape3D" parent="obstacle9"]
+shape = SubResource("CylinderShape3D_jps17")
+
+[node name="mesh" type="MeshInstance3D" parent="obstacle9"]
+mesh = SubResource("CylinderMesh_n7si7")
+
+[node name="obstacle10" type="StaticBody3D" parent="."]
+transform = Transform3D(-4.37114e-08, -0.999999, 0, 1, -4.37113e-08, 0, 0, 0, 0.999999, 24, -3.6, 18.06)
+
+[node name="shape" type="CollisionShape3D" parent="obstacle10"]
+shape = SubResource("CylinderShape3D_jps17")
+
+[node name="mesh" type="MeshInstance3D" parent="obstacle10"]
+mesh = SubResource("CylinderMesh_n7si7")
 
 [node name="environment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_p1wvc")

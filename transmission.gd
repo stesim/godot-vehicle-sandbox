@@ -6,9 +6,9 @@ extends Resource
 
 @export var reverse_gears : Array[float] = [-3.42]
 
-@export var axle_ratio := 3.75
+@export_range(0.0, 6.0, 0.01, "or_greater") var axle_ratio := 3.75
 
-@export var shift_time := 0.25
+@export_range(0.0, 1.0, 0.01, "or_greater") var shift_time := 0.25
 
 
 @export_subgroup("Automation")
@@ -17,20 +17,20 @@ extends Resource
 
 @export var torque_curve : Curve
 
-@export var shift_interval := 1.0
+@export_range(0.0, 4.0, 0.01, "or_greater")  var shift_interval := 1.0
 
-@export var automated_upshift_rpm_threshold := 0.95
+@export_range(0.0, 1.0) var automated_upshift_rpm_threshold := 0.95
 
-@export var automated_downshift_rpm_threshold := 0.9
+@export_range(0.0, 1.0) var automated_downshift_rpm_threshold := 0.9
 
 
 @export_subgroup("Input")
 
 @export var gear := 0
 
-@export var torque_input := 0.0
+@export_range(0.0, 2000.0, 0.1, "or_greater") var torque_input := 0.0
 
-@export var normalized_rpm_input := 0.0
+@export_range(0.0, 1.0) var normalized_rpm_input := 0.0
 
 
 var _torque_output := 0.0

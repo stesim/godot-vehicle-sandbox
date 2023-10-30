@@ -12,6 +12,6 @@ is_automated = true
 shift_interval = 1.0
 automated_upshift_rpm_threshold = 0.95
 automated_downshift_rpm_threshold = 0.9
-gear = 0
+gear = 1
 torque_input = 0.0
 normalized_rpm_input = 0.0

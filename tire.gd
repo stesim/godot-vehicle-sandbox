@@ -2,9 +2,9 @@ class_name Tire
 extends Resource
 
 
-@export var rolling_resistance_coefficient := 0.01
+@export_range(0.0, 0.1, 0.001, "or_greater") var rolling_resistance_coefficient := 0.01
 
-@export var friction_limit := 1.0
+@export_range(0.0, 2.0, 0.01, "or_greater") var friction_limit := 1.0
 
 @export_range(0.0, 1.0) var magic_tweak_factor := 0.5
 

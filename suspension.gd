@@ -2,13 +2,13 @@ class_name Suspension
 extends Resource
 
 
-@export var rest_length := 0.3
+@export_range(0.0, 2.0, 0.01, "or_greater") var rest_length := 0.3
 
-@export var stiffness := 40000.0
+@export_range(0.0, 100000.0, 0.1, "or_greater") var stiffness := 40000.0
 
 @export var stiffness_curve : Curve
 
-@export var damping := 4000.0
+@export_range(0.0, 10000.0, 0.1, "or_greater") var damping := 4000.0
 
 
 func calculate_force(vehicle_state : PhysicsDirectBodyState3D, length : float, velocity : float) -> float:

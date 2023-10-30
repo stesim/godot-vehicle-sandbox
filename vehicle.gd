@@ -7,15 +7,13 @@ const METERS_PER_SECOND := 1.0
 const KILOMETERS_PER_HOUR := 3.6
 
 
-@export var max_steering_angle := deg_to_rad(30.0)
+@export_range(0.0, 90.0, 0.01, "radians") var max_steering_angle := deg_to_rad(30.0)
 
-@export var auto_brake_threshold := 0.25
+@export_range(0.0, 10.0, 0.01, "or_greater") var frontal_area := 2.3
 
-@export var frontal_area := 2.3
+@export_range(0.0, 2.0, 0.01, "or_greater") var drag_coefficient := 0.3
 
-@export var drag_coefficient := 0.3
-
-@export var air_density := 1.204
+@export_range(0.0, 2.0, 0.01, "or_greater") var air_density := 1.204
 
 @export var motor : Motor
 
@@ -29,7 +27,7 @@ const KILOMETERS_PER_HOUR := 3.6
 
 @export var wheels : Array[Wheel] = []
 
-@export var input_speed := 6.0
+@export_range(0.0, 20.0, 0.01, "or_greater") var input_speed := 6.0
 
 @export var motor_audio_controller : MotorAudioController
 

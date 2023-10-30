@@ -2,38 +2,38 @@ class_name Motor
 extends Resource
 
 
-@export var idle_rpm := 800.0
+@export_range(0.0, 2000.0, 0.1, "or_greater") var idle_rpm := 800.0
 
-@export var rpm_limit := 5000.0
+@export_range(0.0, 20000.0, 0.1, "or_greater") var rpm_limit := 5000.0
 
-@export var rpm_limiter_cutoff_time := 0.15
+@export_range(0.0, 1.0, 0.01, "or_greater") var rpm_limiter_cutoff_time := 0.15
 
-@export var peak_torque := 600.0
+@export_range(0.0, 2000.0, 0.1, "or_greater") var peak_torque := 600.0
 
-@export var normalization_rpm := 5000.0
+@export_range(0.0, 20000.0, 0.1, "or_greater") var normalization_rpm := 5000.0
 
 @export var power_torque_curve : Curve
 
 @export var brake_torque_curve : Curve
 
-@export var throttle_response_torque := 800.0
+@export_range(0.0, 2000.0, 0.1, "or_greater") var throttle_response_torque := 800.0
 
-@export var friction_torque := 150.0
+@export_range(0.0, 2000.0, 0.1, "or_greater") var friction_torque := 150.0
 
-@export var inertia := 1.0
+@export_range(0.0, 2.0, 0.01, "or_greater") var inertia := 1.0
 
 
 @export_subgroup("Input")
 
+@export var is_engaged := false
+
 @export_range(0.0, 1.0) var throttle := 0.0
 
-@export var rpm := 0.0 :
+@export_range(0.0, 20000.0, 0.1, "or_greater") var rpm := 0.0 :
 	set(value):
 		rpm = maxf(idle_rpm, value)
 
-@export var rpm_feedback := 0.0
-
-@export var is_engaged := false
+@export_range(0.0, 20000.0, 0.1, "or_greater") var rpm_feedback := 0.0
 
 
 var _torque_output := 0.0
