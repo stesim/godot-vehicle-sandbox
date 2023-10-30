@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="Brake" load_steps=2 format=3 uid="uid://cwrqb53t2ybcx"]
+
+[ext_resource type="Script" path="res://brake.gd" id="1_1tja6"]
+
+[resource]
+script = ExtResource("1_1tja6")
+max_torque = 6000.0
+max_handbrake_torque = 2000.0

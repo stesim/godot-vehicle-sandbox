@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="Tire" load_steps=4 format=3 uid="uid://bjop5g44kwcmm"]
+
+[ext_resource type="Script" path="res://tire.gd" id="1_igp5d"]
+
+[sub_resource type="Curve" id="Curve_ov6qw"]
+_data = [Vector2(0, 0.515789), 0.0, 0.106433, 0, 1, Vector2(0.0989011, 0.526316), 0.0, 0.0, 0, 0, Vector2(0.25, 1), 0.0, 0.0, 0, 0, Vector2(0.56044, 0.936842), -0.155335, -0.155335, 0, 0, Vector2(1, 0.9), 0.0, 0.0, 0, 0]
+point_count = 5
+
+[sub_resource type="Curve" id="Curve_ibqg3"]
+_data = [Vector2(0, 0.494737), 0.0, 0.136842, 0, 1, Vector2(0.0769231, 0.505263), 0.0, 0.0, 0, 0, Vector2(0.18, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.66), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[resource]
+script = ExtResource("1_igp5d")
+rolling_resistance_coefficient = 0.01
+friction_limit = 1.0
+magic_tweak_factor = 0.5
+longitudinal_traction_curve = SubResource("Curve_ibqg3")
+longitudinal_traction_curve_scale = Vector2(1, 1)
+lateral_traction_curve = SubResource("Curve_ov6qw")
+lateral_traction_curve_scale = Vector2(0.175, 1)

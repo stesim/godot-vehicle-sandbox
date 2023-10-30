@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="Transmission" load_steps=2 format=3 uid="uid://i0huri51tmnd"]
+
+[ext_resource type="Script" path="res://transmission.gd" id="1_k23ve"]
+
+[resource]
+script = ExtResource("1_k23ve")
+forward_gears = Array[float]([5.354, 3.243, 2.252, 1.636, 1.211, 1.0, 0.865, 0.717, 0.601])
+reverse_gears = Array[float]([-4.798])
+axle_ratio = 3.273
+shift_time = 0.25
+is_automated = true
+shift_interval = 1.0
+automated_upshift_rpm_threshold = 0.95
+automated_downshift_rpm_threshold = 0.9
+gear = 0
+torque_input = 0.0
+normalized_rpm_input = 0.0

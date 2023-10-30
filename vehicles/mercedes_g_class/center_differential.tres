@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="Differential" load_steps=2 format=3 uid="uid://qsr8lg027fin"]
+
+[ext_resource type="Script" path="res://differential.gd" id="1_xvshk"]
+
+[resource]
+resource_name = "center differential"
+script = ExtResource("1_xvshk")
+limited_slip_ratio = 1.4
+is_locked = true
+torque_split = 0.4
+velocity_input = 0.0
+torque_input = 0.0
+velocity_feedback_1 = 0.0
+velocity_feedback_2 = 0.0
+torque_feedback_1 = 0.0
+torque_feedback_2 = 0.0

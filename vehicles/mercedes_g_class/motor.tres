@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="Motor" load_steps=4 format=3 uid="uid://cwto72kqieatl"]
+
+[ext_resource type="Script" path="res://motor.gd" id="1_k2cjl"]
+
+[sub_resource type="Curve" id="Curve_dj5nd"]
+_data = [Vector2(0, 0), 0.0, 0.5, 0, 1, Vector2(1, 0.5), 0.5, 0.0, 1, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_dce3y"]
+_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 0, Vector2(0.2, 0.8), 3.3011, 3.3011, 0, 0, Vector2(0.239521, 1), 5.0606, 0.0, 1, 0, Vector2(0.64, 1), 0.0, 0.0, 0, 0, Vector2(0.92, 0.679), -1.32348, 0.0, 0, 0]
+point_count = 5
+
+[resource]
+script = ExtResource("1_k2cjl")
+idle_rpm = 800.0
+rpm_limit = 4600.0
+rpm_limiter_cutoff_time = 0.1
+peak_torque = 700.0
+normalization_rpm = 5000.0
+power_torque_curve = SubResource("Curve_dce3y")
+brake_torque_curve = SubResource("Curve_dj5nd")
+throttle_response_torque = 800.0
+friction_torque = 150.0
+inertia = 1.0
+throttle = 0.0
+rpm = 0.0
+rpm_feedback = 0.0
+is_engaged = false
