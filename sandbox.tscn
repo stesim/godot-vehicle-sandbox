@@ -51,8 +51,9 @@ camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehic
 [node name="controller" type="Node" parent="."]
 script = ExtResource("2_eqkow")
 
-[node name="acceleration_timer" type="Node" parent="."]
+[node name="acceleration_timer" type="Node" parent="." node_paths=PackedStringArray("vehicle")]
 script = ExtResource("3_twb0k")
+vehicle = NodePath("../vehicle")
 target_speeds = Array[float]([30.0, 60.0, 80.0, 100.0, 120.0, 140.0, 160.0, 180.0])
 reference_times = Array[float]([1.0, 2.6, 4.4, 6.6, 9.5, 13.6, 19.5, 30.5])
 
