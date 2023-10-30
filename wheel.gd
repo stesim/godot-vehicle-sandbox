@@ -43,6 +43,8 @@ extends RayCast3D
 @export var traction_control_enabled := true
 
 
+var _suspension_length := 0.0
+
 var _wheel_load := 0.0
 
 var _contact_velocity := Vector3.ZERO
@@ -57,7 +59,8 @@ var _torque_feedback := 0.0
 
 
 func _ready() -> void:
-	target_position.y = -(suspension.rest_length + radius)
+	_suspension_length = suspension.rest_length
+	target_position.y = -(_suspension_length + radius)
 
 
 func get_angular_velocity() -> float:
@@ -101,13 +104,17 @@ func apply_suspension_force(vehicle_state : PhysicsDirectBodyState3D) -> void:
 		_wheel_load = 0.0
 		return
 
+	var up := global_transform.basis.y
 	var contact_point := get_collision_point()
+	var new_suspension_length := (global_position - contact_point).dot(up) - radius
+	var suspension_velocity := (new_suspension_length - _suspension_length) / vehicle_state.step
+	_suspension_length = new_suspension_length
 	_contact_velocity = vehicle_state.get_velocity_at_local_position(contact_point - vehicle_state.transform.origin)
 
-	var suspension_force := suspension.calculate_force(vehicle_state, self)
+	var suspension_force := suspension.calculate_force(vehicle_state, new_suspension_length, suspension_velocity)
 
 	var force_vector := suspension_force * global_transform.basis.y
-	var force_position := contact_point - vehicle_state.transform.origin
+	var force_position := global_position - vehicle_state.transform.origin
 	vehicle_state.apply_force(force_vector, force_position)
 
 	# TODO: consider velocity of collider
