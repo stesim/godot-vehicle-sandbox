@@ -1,15 +1,9 @@
-[gd_resource type="Resource" script_class="Suspension" load_steps=3 format=3 uid="uid://bjbidt2pvfu8l"]
+[gd_resource type="Resource" script_class="Suspension" load_steps=2 format=3 uid="uid://bjbidt2pvfu8l"]
 
 [ext_resource type="Script" path="res://suspension.gd" id="1_a2h3e"]
-
-[sub_resource type="Curve" id="Curve_ihhsw"]
-max_value = 4.0
-_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.9, 1), 0.0, 0.0, 0, 0, Vector2(1, 1.5), 17.0026, 0.0, 0, 0]
-point_count = 3
 
 [resource]
 script = ExtResource("1_a2h3e")
 rest_length = 0.2
 stiffness = 50000.0
-stiffness_curve = SubResource("Curve_ihhsw")
 damping = 5000.0

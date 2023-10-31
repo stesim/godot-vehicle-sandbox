@@ -1,5 +1,5 @@
 class_name Wheel
-extends ShapeCast3D
+extends Node3D
 
 
 @export var visuals : Node3D
@@ -12,7 +12,7 @@ extends ShapeCast3D
 
 @export_range(0.0, 1.0, 0.01, "or_greater") var radius := 0.4
 
-@export_range(0.0, 1.0, 0.01, "or_greater") var width := 0.2
+@export_range(0.0, 1.0, 0.01, "or_greater") var width := 0.3
 
 @export_range(0.0, 2.0, 0.01, "or_greater") var inertia := 1.0
 
@@ -66,9 +66,11 @@ var _slip := Vector2.ZERO
 var _torque_feedback := 0.0
 
 
+@onready var _shape_cast_query := _create_shape_cast_query()
+
+
 func _ready() -> void:
 	_suspension_length = suspension.rest_length
-	target_position.y = -_suspension_length
 
 
 func get_angular_velocity() -> float:
@@ -116,7 +118,7 @@ func is_bottoming_out() -> bool:
 
 
 func apply_suspension_force(vehicle_state : PhysicsDirectBodyState3D) -> void:
-	_find_contact_point()
+	_find_contact_point(vehicle_state.get_space_state())
 
 	if not _is_in_contact:
 		_suspension_length = suspension.rest_length
@@ -234,23 +236,26 @@ func _calculate_slip(forward : Vector3, right : Vector3) -> Vector2:
 	return slip
 
 
-func _find_contact_point() -> void:
+func _find_contact_point(space_state : PhysicsDirectSpaceState3D) -> void:
 	_is_in_contact = false
 	_contact_point = Vector3.ZERO
 	_contact_normal = Vector3.ZERO
 
-	var min_distance_squared := INF
-	for i in get_collision_count():
-		var point := get_collision_point(i)
-		var local_point := to_local(point)
-		if absf(local_point.x) > 0.5 * width:
-			continue
-		var distance_squared := local_point.length_squared()
-		if distance_squared < min_distance_squared:
-			min_distance_squared = distance_squared
-			_is_in_contact = true
-			_contact_point = point
-			_contact_normal = get_collision_normal(i)
+	_shape_cast_query.transform = Transform3D().rotated(Vector3.FORWARD, 0.5 * PI).translated(global_position)
+	_shape_cast_query.motion = -suspension.rest_length * global_transform.basis.y
+	var results := space_state.cast_motion(_shape_cast_query)
+
+	var motion_fraction := results[1]
+	if not is_equal_approx(motion_fraction, 1.0):
+		_shape_cast_query.transform.origin += motion_fraction * _shape_cast_query.motion
+
+	var intersection := space_state.get_rest_info(_shape_cast_query)
+	if intersection.is_empty():
+		return
+
+	_is_in_contact = true
+	_contact_point = intersection.point
+	_contact_normal = intersection.normal
 
 
 func _process(delta : float) -> void:
@@ -265,3 +270,14 @@ func _update_visuals(delta : float) -> void:
 		visuals.position.y = 0.0
 
 	visuals.rotate(Vector3.LEFT, _angular_velocity * delta)
+
+
+func _create_shape_cast_query() -> PhysicsShapeQueryParameters3D:
+	var cylinder := CylinderShape3D.new()
+	cylinder.height = width
+	cylinder.radius = radius
+
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.exclude = [get_parent().get_rid()]
+	query.shape = cylinder
+	return query

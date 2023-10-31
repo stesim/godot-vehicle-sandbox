@@ -1,4 +1,4 @@
-[gd_scene load_steps=65 format=3 uid="uid://bffl1enyve7sk"]
+[gd_scene load_steps=64 format=3 uid="uid://bffl1enyve7sk"]
 
 [ext_resource type="Script" path="res://vehicle.gd" id="1_guobo"]
 [ext_resource type="Resource" uid="uid://cwto72kqieatl" path="res://vehicles/mercedes_g_class/motor.tres" id="2_72vbb"]
@@ -412,9 +412,6 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_pdbvp")
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_rxjkq"]
-radius = 0.4
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l63hl"]
 resource_name = "Material.006"
 cull_mode = 2
@@ -618,20 +615,19 @@ skeleton = NodePath("")
 mesh = SubResource("ArrayMesh_qptmn")
 skeleton = NodePath("")
 
-[node name="wheel_fl" type="ShapeCast3D" parent="." node_paths=PackedStringArray("visuals")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, -1.45)
-shape = SubResource("SphereShape3D_rxjkq")
-max_results = 4
+[node name="wheel_fl" type="Node3D" parent="." node_paths=PackedStringArray("visuals")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.775, 0.2, -1.45)
 script = ExtResource("8_6bur0")
 visuals = NodePath("visuals")
 is_driven = true
 is_steering = true
+width = 0.28
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")
 
 [node name="visuals" type="Node3D" parent="wheel_fl"]
-transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, 0, 0, 0)
+transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, -0.075, 0, 0)
 
 [node name="Object_15" type="MeshInstance3D" parent="wheel_fl/visuals"]
 mesh = SubResource("ArrayMesh_pve3x")
@@ -652,20 +648,19 @@ script = ExtResource("13_rawqa")
 wheel = NodePath("../..")
 smoke = NodePath("..")
 
-[node name="wheel_fr" type="ShapeCast3D" parent="." node_paths=PackedStringArray("visuals")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, -1.45)
-shape = SubResource("SphereShape3D_rxjkq")
-max_results = 4
+[node name="wheel_fr" type="Node3D" parent="." node_paths=PackedStringArray("visuals")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.775, 0.2, -1.45)
 script = ExtResource("8_6bur0")
 visuals = NodePath("visuals")
 is_driven = true
 is_steering = true
+width = 0.28
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")
 
 [node name="visuals" type="Node3D" parent="wheel_fr"]
-transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0, 0, 0)
+transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0.075, 0, 0)
 
 [node name="Object_15" type="MeshInstance3D" parent="wheel_fr/visuals"]
 mesh = SubResource("ArrayMesh_pve3x")
@@ -686,20 +681,19 @@ script = ExtResource("13_rawqa")
 wheel = NodePath("../..")
 smoke = NodePath("..")
 
-[node name="wheel_rl" type="ShapeCast3D" parent="." node_paths=PackedStringArray("visuals")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.85, 0.2, 1.45)
-shape = SubResource("SphereShape3D_rxjkq")
-max_results = 4
+[node name="wheel_rl" type="Node3D" parent="." node_paths=PackedStringArray("visuals")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.775, 0.2, 1.45)
 script = ExtResource("8_6bur0")
 visuals = NodePath("visuals")
 is_driven = true
 has_handbrake = true
+width = 0.28
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")
 
 [node name="visuals" type="Node3D" parent="wheel_rl"]
-transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, 0, 0, 0)
+transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, -0.075, 0, 0)
 
 [node name="Object_15" type="MeshInstance3D" parent="wheel_rl/visuals"]
 mesh = SubResource("ArrayMesh_pve3x")
@@ -720,20 +714,19 @@ script = ExtResource("13_rawqa")
 wheel = NodePath("../..")
 smoke = NodePath("..")
 
-[node name="wheel_rr" type="ShapeCast3D" parent="." node_paths=PackedStringArray("visuals")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.85, 0.2, 1.45)
-shape = SubResource("SphereShape3D_rxjkq")
-max_results = 4
+[node name="wheel_rr" type="Node3D" parent="." node_paths=PackedStringArray("visuals")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.775, 0.2, 1.45)
 script = ExtResource("8_6bur0")
 visuals = NodePath("visuals")
 is_driven = true
 has_handbrake = true
+width = 0.28
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")
 
 [node name="visuals" type="Node3D" parent="wheel_rr"]
-transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0, 0, 0)
+transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0.075, 0, 0)
 
 [node name="Object_15" type="MeshInstance3D" parent="wheel_rr/visuals"]
 mesh = SubResource("ArrayMesh_pve3x")

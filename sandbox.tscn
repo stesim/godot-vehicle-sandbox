@@ -56,7 +56,7 @@ glow_enabled = true
 [node name="sandbox" type="Node3D" node_paths=PackedStringArray("camera_crane", "camera_views")]
 script = ExtResource("1_nf78t")
 camera_crane = NodePath("camera_crane")
-camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehicle/camera_view_back_right"), NodePath("vehicle/camera_view_right"), NodePath("vehicle/camera_view_left")]
+camera_views = [NodePath("vehicle/look_ahead/camera_view_back"), NodePath("vehicle/camera_view_back_right"), NodePath("vehicle/camera_view_right"), NodePath("vehicle/camera_view_front"), NodePath("vehicle/camera_view_left")]
 
 [node name="controller" type="Node" parent="."]
 script = ExtResource("2_eqkow")
@@ -85,6 +85,9 @@ transform = Transform3D(0.958083, -0.138447, 0.250818, 0, 0.875482, 0.48325, -0.
 
 [node name="camera_view_right" type="Marker3D" parent="vehicle"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 6, 1, 0)
+
+[node name="camera_view_front" type="Marker3D" parent="vehicle"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, -6)
 
 [node name="camera_view_left" type="Marker3D" parent="vehicle"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -6, 1, 0)
