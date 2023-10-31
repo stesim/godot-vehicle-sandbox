@@ -1,4 +1,4 @@
-[gd_scene load_steps=61 format=3 uid="uid://bffl1enyve7sk"]
+[gd_scene load_steps=64 format=3 uid="uid://bffl1enyve7sk"]
 
 [ext_resource type="Script" path="res://vehicle.gd" id="1_guobo"]
 [ext_resource type="Resource" uid="uid://cwto72kqieatl" path="res://vehicles/mercedes_g_class/motor.tres" id="2_72vbb"]
@@ -18,11 +18,8 @@
 [ext_resource type="AudioStream" uid="uid://bt4wa6p377qf6" path="res://assets/sounds/tires_squal_loop.wav" id="16_nwflk"]
 [ext_resource type="Script" path="res://tire_audio_controller.gd" id="17_tabg7"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_3u1rk"]
-size = Vector3(1.87, 0.769, 4.36868)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ms1xp"]
-size = Vector3(1.63821, 0.821474, 2.84861)
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_3l5ve"]
+friction = 0.5
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jrokk"]
 resource_name = "Material.001"
@@ -539,10 +536,25 @@ point_count = 2
 _data = [Vector2(0, 0), 0.16681, 0.173796, 0, 0, Vector2(1, 1), 1.87193, 0.0, 0, 0]
 point_count = 2
 
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kauiq"]
+radius = 0.4
+height = 1.87
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_b7hcg"]
+height = 3.6
+radius = 0.4
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3u1rk"]
+size = Vector3(1.06, 0.79, 3.63)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ms1xp"]
+size = Vector3(1.53, 1.163, 2.635)
+
 [node name="mercedes_g_class" type="RigidBody3D" node_paths=PackedStringArray("wheels", "motor_audio_controller", "wheel_audio_controller")]
 mass = 2500.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, 0.2, 0)
+physics_material_override = SubResource("PhysicsMaterial_3l5ve")
 can_sleep = false
 linear_damp_mode = 1
 script = ExtResource("1_guobo")
@@ -556,14 +568,6 @@ rear_differential = ExtResource("6_ohqhk")
 wheels = [NodePath("wheel_fl"), NodePath("wheel_fr"), NodePath("wheel_rl"), NodePath("wheel_rr")]
 motor_audio_controller = NodePath("motor_sound/controller")
 wheel_audio_controller = NodePath("slide_sound/controller")
-
-[node name="shape_1" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.522, 0.0276535)
-shape = SubResource("BoxShape3D_3u1rk")
-
-[node name="shape_2" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.316, 0.709)
-shape = SubResource("BoxShape3D_ms1xp")
 
 [node name="body_visuals" type="Node3D" parent="."]
 transform = Transform3D(-1.5, 0, -2.26494e-07, 0, 1.5, 0, 2.26494e-07, 0, -1.5, 0, -0.771, 1.32)
@@ -765,3 +769,27 @@ slip_pitch_curve = SubResource("Curve_ajux4")
 slip_volume_min = 0.25
 slip_volume_max = 1.0
 slip_volume_curve = SubResource("Curve_mtbea")
+
+[node name="capsule_front" type="CollisionShape3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0.536009, -1.76515)
+shape = SubResource("CapsuleShape3D_kauiq")
+
+[node name="capsule_back" type="CollisionShape3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0.536009, 1.86405)
+shape = SubResource("CapsuleShape3D_kauiq")
+
+[node name="cylinder_left" type="CollisionShape3D" parent="."]
+transform = Transform3D(1.91069e-15, 4.37114e-08, 1, 1, -4.37114e-08, 0, 4.37114e-08, 1, -4.37114e-08, -0.528, 0.536, 0.046)
+shape = SubResource("CylinderShape3D_b7hcg")
+
+[node name="cylinder_right" type="CollisionShape3D" parent="."]
+transform = Transform3D(1.91069e-15, 4.37114e-08, 1, 1, -4.37114e-08, 0, 4.37114e-08, 1, -4.37114e-08, 0.528, 0.536, 0.046)
+shape = SubResource("CylinderShape3D_b7hcg")
+
+[node name="box_bottom" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.539763, 0.0495993)
+shape = SubResource("BoxShape3D_3u1rk")
+
+[node name="box_top" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.116, 0.8)
+shape = SubResource("BoxShape3D_ms1xp")
