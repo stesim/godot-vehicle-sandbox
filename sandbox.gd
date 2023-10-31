@@ -19,8 +19,6 @@ const AccelerationTimer := preload("acceleration_timer.gd")
 
 @onready var _rpm_label : Label = %rpm_label
 
-@onready var _slip_info := $hud/slip_info
-
 @onready var _acceleration_timer : AccelerationTimer = $acceleration_timer
 
 @onready var _acceleration_timer_interface := $hud/acceleration_timer
@@ -45,8 +43,6 @@ func _process(_delta : float) -> void:
 	_gear_label.text = "D" + str(gear) if gear > 0 else "R" if gear < 0 else "N"
 	_gear_label.modulate.a = 0.5 if _vehicle.transmission.is_shifting() else 1.0
 	_rpm_label.text = str(int(_vehicle.motor.rpm))
-	for i in _vehicle.wheels.size():
-		_slip_info.get_child(i).text = "%+.2f" % _vehicle.wheels[i].get_slip_velocity().x
 
 
 func _cycle_camera_view() -> void:

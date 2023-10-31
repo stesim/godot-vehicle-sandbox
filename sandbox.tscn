@@ -304,44 +304,6 @@ size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.705882, 0.705882, 0.705882, 1)
 text = "1/min"
 
-[node name="slip_info" type="GridContainer" parent="hud"]
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -130.0
-offset_top = -240.0
-offset_right = 130.0
-offset_bottom = -184.0
-grow_horizontal = 2
-grow_vertical = 0
-columns = 2
-
-[node name="Label" type="Label" parent="hud/slip_info"]
-custom_minimum_size = Vector2(128, 0)
-layout_mode = 2
-text = "0.0"
-horizontal_alignment = 1
-
-[node name="Label2" type="Label" parent="hud/slip_info"]
-custom_minimum_size = Vector2(128, 0)
-layout_mode = 2
-text = "0.0"
-horizontal_alignment = 1
-
-[node name="Label3" type="Label" parent="hud/slip_info"]
-custom_minimum_size = Vector2(128, 0)
-layout_mode = 2
-text = "0.0"
-horizontal_alignment = 1
-
-[node name="Label4" type="Label" parent="hud/slip_info"]
-custom_minimum_size = Vector2(128, 0)
-layout_mode = 2
-text = "0.0"
-horizontal_alignment = 1
-
 [node name="acceleration_timer" type="GridContainer" parent="hud"]
 offset_left = 32.0
 offset_top = 32.0

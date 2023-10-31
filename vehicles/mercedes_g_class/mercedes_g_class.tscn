@@ -1,4 +1,4 @@
-[gd_scene load_steps=64 format=3 uid="uid://bffl1enyve7sk"]
+[gd_scene load_steps=65 format=3 uid="uid://bffl1enyve7sk"]
 
 [ext_resource type="Script" path="res://vehicle.gd" id="1_guobo"]
 [ext_resource type="Resource" uid="uid://cwto72kqieatl" path="res://vehicles/mercedes_g_class/motor.tres" id="2_72vbb"]
@@ -8,6 +8,7 @@
 [ext_resource type="Resource" uid="uid://cqqmqfknlsrjf" path="res://vehicles/mercedes_g_class/rear_differential.tres" id="6_ohqhk"]
 [ext_resource type="Texture2D" uid="uid://cb5g8miqmixlq" path="res://assets/mercedes_g_class/mercedes_benz_g-class_w263_0.png" id="7_h2ax0"]
 [ext_resource type="Script" path="res://wheel.gd" id="8_6bur0"]
+[ext_resource type="Script" path="res://axle.gd" id="8_go1if"]
 [ext_resource type="Resource" uid="uid://bjbidt2pvfu8l" path="res://vehicles/mercedes_g_class/suspension.tres" id="9_bvk33"]
 [ext_resource type="Resource" uid="uid://bjop5g44kwcmm" path="res://vehicles/mercedes_g_class/tire.tres" id="10_i278x"]
 [ext_resource type="Resource" uid="uid://cwrqb53t2ybcx" path="res://vehicles/mercedes_g_class/brake.tres" id="11_sd5d5"]
@@ -550,7 +551,7 @@ size = Vector3(1.06, 0.79, 3.63)
 [sub_resource type="BoxShape3D" id="BoxShape3D_ms1xp"]
 size = Vector3(1.53, 1.163, 2.635)
 
-[node name="mercedes_g_class" type="RigidBody3D" node_paths=PackedStringArray("wheels", "motor_audio_controller", "wheel_audio_controller")]
+[node name="mercedes_g_class" type="RigidBody3D" node_paths=PackedStringArray("motor_audio_controller", "wheel_audio_controller")]
 mass = 2500.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, 0.2, 0)
@@ -562,10 +563,7 @@ frontal_area = 3.16
 drag_coefficient = 0.533
 motor = ExtResource("2_72vbb")
 transmission = ExtResource("3_1xtoa")
-front_differential = ExtResource("4_4od2o")
 center_differential = ExtResource("5_8vhc7")
-rear_differential = ExtResource("6_ohqhk")
-wheels = [NodePath("wheel_fl"), NodePath("wheel_fr"), NodePath("wheel_rl"), NodePath("wheel_rr")]
 motor_audio_controller = NodePath("motor_sound/controller")
 wheel_audio_controller = NodePath("slide_sound/controller")
 
@@ -615,134 +613,141 @@ skeleton = NodePath("")
 mesh = SubResource("ArrayMesh_qptmn")
 skeleton = NodePath("")
 
-[node name="wheel_fl" type="Node3D" parent="." node_paths=PackedStringArray("visuals")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.775, 0.2, -1.45)
+[node name="front_axle" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -1.45)
+script = ExtResource("8_go1if")
+is_steering = true
+is_driven = true
+differential = ExtResource("4_4od2o")
+
+[node name="wheel_fl" type="Node3D" parent="front_axle" node_paths=PackedStringArray("visuals")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.775, 0, 0)
 script = ExtResource("8_6bur0")
 visuals = NodePath("visuals")
-is_driven = true
-is_steering = true
 width = 0.28
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")
 
-[node name="visuals" type="Node3D" parent="wheel_fl"]
+[node name="visuals" type="Node3D" parent="front_axle/wheel_fl"]
 transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, -0.075, 0, 0)
 
-[node name="Object_15" type="MeshInstance3D" parent="wheel_fl/visuals"]
+[node name="Object_15" type="MeshInstance3D" parent="front_axle/wheel_fl/visuals"]
 mesh = SubResource("ArrayMesh_pve3x")
 skeleton = NodePath("")
 
-[node name="Object_16" type="MeshInstance3D" parent="wheel_fl/visuals"]
+[node name="Object_16" type="MeshInstance3D" parent="front_axle/wheel_fl/visuals"]
 mesh = SubResource("ArrayMesh_f1n38")
 skeleton = NodePath("")
 
-[node name="Object_17" type="MeshInstance3D" parent="wheel_fl/visuals"]
+[node name="Object_17" type="MeshInstance3D" parent="front_axle/wheel_fl/visuals"]
 mesh = SubResource("ArrayMesh_r5qm2")
 skeleton = NodePath("")
 
-[node name="smoke_particles" parent="wheel_fl" instance=ExtResource("12_fpdpp")]
+[node name="smoke_particles" parent="front_axle/wheel_fl" instance=ExtResource("12_fpdpp")]
 
-[node name="controller" type="Node" parent="wheel_fl/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
+[node name="controller" type="Node" parent="front_axle/wheel_fl/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
 script = ExtResource("13_rawqa")
 wheel = NodePath("../..")
 smoke = NodePath("..")
 
-[node name="wheel_fr" type="Node3D" parent="." node_paths=PackedStringArray("visuals")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.775, 0.2, -1.45)
+[node name="wheel_fr" type="Node3D" parent="front_axle" node_paths=PackedStringArray("visuals")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.775, 0, 0)
 script = ExtResource("8_6bur0")
 visuals = NodePath("visuals")
-is_driven = true
-is_steering = true
 width = 0.28
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")
 
-[node name="visuals" type="Node3D" parent="wheel_fr"]
+[node name="visuals" type="Node3D" parent="front_axle/wheel_fr"]
 transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0.075, 0, 0)
 
-[node name="Object_15" type="MeshInstance3D" parent="wheel_fr/visuals"]
+[node name="Object_15" type="MeshInstance3D" parent="front_axle/wheel_fr/visuals"]
 mesh = SubResource("ArrayMesh_pve3x")
 skeleton = NodePath("")
 
-[node name="Object_16" type="MeshInstance3D" parent="wheel_fr/visuals"]
+[node name="Object_16" type="MeshInstance3D" parent="front_axle/wheel_fr/visuals"]
 mesh = SubResource("ArrayMesh_f1n38")
 skeleton = NodePath("")
 
-[node name="Object_17" type="MeshInstance3D" parent="wheel_fr/visuals"]
+[node name="Object_17" type="MeshInstance3D" parent="front_axle/wheel_fr/visuals"]
 mesh = SubResource("ArrayMesh_r5qm2")
 skeleton = NodePath("")
 
-[node name="smoke_particles" parent="wheel_fr" instance=ExtResource("12_fpdpp")]
+[node name="smoke_particles" parent="front_axle/wheel_fr" instance=ExtResource("12_fpdpp")]
 
-[node name="controller" type="Node" parent="wheel_fr/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
+[node name="controller" type="Node" parent="front_axle/wheel_fr/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
 script = ExtResource("13_rawqa")
 wheel = NodePath("../..")
 smoke = NodePath("..")
 
-[node name="wheel_rl" type="Node3D" parent="." node_paths=PackedStringArray("visuals")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.775, 0.2, 1.45)
+[node name="rear_axle" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 1.45)
+script = ExtResource("8_go1if")
+is_driven = true
+differential = ExtResource("6_ohqhk")
+
+[node name="wheel_rl" type="Node3D" parent="rear_axle" node_paths=PackedStringArray("visuals")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.775, 0, 0)
 script = ExtResource("8_6bur0")
 visuals = NodePath("visuals")
-is_driven = true
 has_handbrake = true
 width = 0.28
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")
 
-[node name="visuals" type="Node3D" parent="wheel_rl"]
+[node name="visuals" type="Node3D" parent="rear_axle/wheel_rl"]
 transform = Transform3D(-1.10153e-08, 0.252, 0, -0.252, -1.10153e-08, 0, 0, 0, 0.252, -0.075, 0, 0)
 
-[node name="Object_15" type="MeshInstance3D" parent="wheel_rl/visuals"]
+[node name="Object_15" type="MeshInstance3D" parent="rear_axle/wheel_rl/visuals"]
 mesh = SubResource("ArrayMesh_pve3x")
 skeleton = NodePath("")
 
-[node name="Object_16" type="MeshInstance3D" parent="wheel_rl/visuals"]
+[node name="Object_16" type="MeshInstance3D" parent="rear_axle/wheel_rl/visuals"]
 mesh = SubResource("ArrayMesh_f1n38")
 skeleton = NodePath("")
 
-[node name="Object_17" type="MeshInstance3D" parent="wheel_rl/visuals"]
+[node name="Object_17" type="MeshInstance3D" parent="rear_axle/wheel_rl/visuals"]
 mesh = SubResource("ArrayMesh_r5qm2")
 skeleton = NodePath("")
 
-[node name="smoke_particles" parent="wheel_rl" instance=ExtResource("12_fpdpp")]
+[node name="smoke_particles" parent="rear_axle/wheel_rl" instance=ExtResource("12_fpdpp")]
 
-[node name="controller" type="Node" parent="wheel_rl/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
+[node name="controller" type="Node" parent="rear_axle/wheel_rl/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
 script = ExtResource("13_rawqa")
 wheel = NodePath("../..")
 smoke = NodePath("..")
 
-[node name="wheel_rr" type="Node3D" parent="." node_paths=PackedStringArray("visuals")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.775, 0.2, 1.45)
+[node name="wheel_rr" type="Node3D" parent="rear_axle" node_paths=PackedStringArray("visuals")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.775, 0, 0)
 script = ExtResource("8_6bur0")
 visuals = NodePath("visuals")
-is_driven = true
 has_handbrake = true
 width = 0.28
 suspension = ExtResource("9_bvk33")
 tire = ExtResource("10_i278x")
 brake = ExtResource("11_sd5d5")
 
-[node name="visuals" type="Node3D" parent="wheel_rr"]
+[node name="visuals" type="Node3D" parent="rear_axle/wheel_rr"]
 transform = Transform3D(1.10153e-08, -0.252, -2.20305e-08, -0.252, -1.10153e-08, 0, -9.62986e-16, 2.20305e-08, -0.252, 0.075, 0, 0)
 
-[node name="Object_15" type="MeshInstance3D" parent="wheel_rr/visuals"]
+[node name="Object_15" type="MeshInstance3D" parent="rear_axle/wheel_rr/visuals"]
 mesh = SubResource("ArrayMesh_pve3x")
 skeleton = NodePath("")
 
-[node name="Object_16" type="MeshInstance3D" parent="wheel_rr/visuals"]
+[node name="Object_16" type="MeshInstance3D" parent="rear_axle/wheel_rr/visuals"]
 mesh = SubResource("ArrayMesh_f1n38")
 skeleton = NodePath("")
 
-[node name="Object_17" type="MeshInstance3D" parent="wheel_rr/visuals"]
+[node name="Object_17" type="MeshInstance3D" parent="rear_axle/wheel_rr/visuals"]
 mesh = SubResource("ArrayMesh_r5qm2")
 skeleton = NodePath("")
 
-[node name="smoke_particles" parent="wheel_rr" instance=ExtResource("12_fpdpp")]
+[node name="smoke_particles" parent="rear_axle/wheel_rr" instance=ExtResource("12_fpdpp")]
 
-[node name="controller" type="Node" parent="wheel_rr/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
+[node name="controller" type="Node" parent="rear_axle/wheel_rr/smoke_particles" node_paths=PackedStringArray("wheel", "smoke")]
 script = ExtResource("13_rawqa")
 wheel = NodePath("../..")
 smoke = NodePath("..")

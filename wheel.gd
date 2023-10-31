@@ -4,10 +4,6 @@ extends Node3D
 
 @export var visuals : Node3D
 
-@export var is_driven := false
-
-@export var is_steering := false
-
 @export var has_handbrake := false
 
 @export_range(0.0, 1.0, 0.01, "or_greater") var radius := 0.4
@@ -273,11 +269,16 @@ func _update_visuals(delta : float) -> void:
 
 
 func _create_shape_cast_query() -> PhysicsShapeQueryParameters3D:
+	var vehicle := get_parent()
+	while vehicle != null and not vehicle is Vehicle:
+		vehicle = vehicle.get_parent()
+
 	var cylinder := CylinderShape3D.new()
 	cylinder.height = width
 	cylinder.radius = radius
 
 	var query := PhysicsShapeQueryParameters3D.new()
-	query.exclude = [get_parent().get_rid()]
+	if vehicle != null:
+		query.exclude = [vehicle.get_rid()]
 	query.shape = cylinder
 	return query

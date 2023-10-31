@@ -19,13 +19,7 @@ const KILOMETERS_PER_HOUR := 3.6
 
 @export var transmission : Transmission
 
-@export var front_differential : Differential
-
 @export var center_differential : Differential
-
-@export var rear_differential : Differential
-
-@export var wheels : Array[Wheel] = []
 
 @export_range(0.0, 20.0, 0.01, "or_greater") var input_speed := 6.0
 
@@ -33,6 +27,8 @@ const KILOMETERS_PER_HOUR := 3.6
 
 @export var wheel_audio_controller : TireAudioController
 
+
+var _axles : Array[Axle] = []
 
 var _engine_input := 0.0
 
@@ -47,6 +43,11 @@ func get_speed(unit := METERS_PER_SECOND) -> float:
 	return -linear_velocity.dot(global_transform.basis.z) * unit
 
 
+func _init() -> void:
+	child_entered_tree.connect(_on_child_entered)
+	child_exiting_tree.connect(_on_child_exiting)
+
+
 func _ready() -> void:
 	transmission.torque_curve = motor.power_torque_curve
 
@@ -58,8 +59,8 @@ func _process(delta : float) -> void:
 
 func _integrate_forces(state : PhysicsDirectBodyState3D) -> void:
 	_apply_drive_input(state.step)
-	_apply_suspension_forces(state)
-	_apply_tire_forces(state)
+	for axle in _axles:
+		axle.update(state, mass / _axles.size())
 	_apply_drag(state)
 
 
@@ -68,27 +69,6 @@ func _unhandled_input(event : InputEvent) -> void:
 		transmission.shift_relative(+1)
 	elif event.is_action_pressed(&"shift_down"):
 		transmission.shift_relative(-1)
-
-
-func _apply_wheel_inputs(delta : float) -> void:
-	for wheel in wheels:
-		wheel.apply_inputs(delta)
-
-
-func _apply_suspension_forces(state : PhysicsDirectBodyState3D) -> void:
-	for wheel in wheels:
-		wheel.apply_suspension_force(state)
-
-	for wheel in wheels:
-		if wheel.is_bottoming_out():
-			var virtual_mass := mass / wheels.size()
-			wheel.apply_bottom_out_force(state, virtual_mass)
-
-
-func _apply_tire_forces(state : PhysicsDirectBodyState3D) -> void:
-	for wheel in wheels:
-		wheel.apply_drive_forces(state)
-		wheel.apply_rolling_resistance(state)
 
 
 func _update_inputs(delta : float) -> void:
@@ -110,9 +90,10 @@ func _apply_drive_input(delta : float) -> void:
 		motor.rpm_feedback = 0.0
 	else:
 		var feedback_rpm := INF
-		for wheel in wheels:
-			if wheel.is_driven:
-				feedback_rpm = minf(feedback_rpm, gear_ratio * wheel.get_rpm())
+		for axle in _axles:
+			if axle.is_driven:
+				for wheel in axle.get_wheels():
+					feedback_rpm = minf(feedback_rpm, gear_ratio * wheel.get_rpm())
 		motor.rpm_feedback = feedback_rpm
 
 	motor.update(delta)
@@ -121,69 +102,35 @@ func _apply_drive_input(delta : float) -> void:
 	transmission.normalized_rpm_input = motor.rpm / motor.normalization_rpm
 	transmission.update(delta)
 
-	if motor.is_engaged:
-		# HACK: assumes wheel positions and 4-wheel drive
-		var feedback_fl := wheels[0].get_torque_feedback()
-		var feedback_fr := wheels[1].get_torque_feedback()
-		var feedback_rl := wheels[2].get_torque_feedback()
-		var feedback_rr := wheels[3].get_torque_feedback()
-
-		var front_feedback := feedback_fl + feedback_fr
-		var rear_feedback := feedback_rl + feedback_rr
-
+	if motor.is_engaged and center_differential != null and _axles.size() == 2:
 		center_differential.torque_input = transmission.get_torque_output()
-		center_differential.velocity_feedback_1 = 0.5 * (wheels[2].get_angular_velocity() + wheels[3].get_angular_velocity())
-		center_differential.velocity_feedback_2 = 0.5 * (wheels[0].get_angular_velocity() + wheels[1].get_angular_velocity())
-		center_differential.torque_feedback_1 = rear_feedback
-		center_differential.torque_feedback_2 = front_feedback
+		center_differential.velocity_feedback_1 = _axles[0].get_angular_velocity_feedback()
+		center_differential.velocity_feedback_2 = _axles[1].get_angular_velocity_feedback()
+		center_differential.torque_feedback_1 = _axles[0].get_torque_feedback()
+		center_differential.torque_feedback_2 = _axles[1].get_torque_feedback()
 		center_differential.update()
 
-		rear_differential.torque_input = center_differential.get_torque_output_1()
-		rear_differential.velocity_feedback_1 = wheels[2].get_angular_velocity()
-		rear_differential.velocity_feedback_2 = wheels[3].get_angular_velocity()
-		rear_differential.torque_feedback_1 = feedback_rl
-		rear_differential.torque_feedback_2 = feedback_rr
-		rear_differential.update()
-
-		front_differential.torque_input = center_differential.get_torque_output_2()
-		front_differential.velocity_feedback_1 = wheels[0].get_angular_velocity()
-		front_differential.velocity_feedback_2 = wheels[1].get_angular_velocity()
-		front_differential.torque_feedback_1 = feedback_fl
-		front_differential.torque_feedback_2 = feedback_fr
-		front_differential.update()
-
-		wheels[0].drive_torque = front_differential.get_torque_output_1()
-		wheels[1].drive_torque = front_differential.get_torque_output_2()
-		wheels[2].drive_torque = rear_differential.get_torque_output_1()
-		wheels[3].drive_torque = rear_differential.get_torque_output_2()
+		_axles[0].torque_input = center_differential.get_torque_output_1()
+		_axles[1].torque_input = center_differential.get_torque_output_2()
 	else:
-		wheels[0].drive_torque = 0.0
-		wheels[1].drive_torque = 0.0
-		wheels[2].drive_torque = 0.0
-		wheels[3].drive_torque = 0.0
+		for axle in _axles:
+			axle.torque_input = transmission.get_torque_output()
 
-	for wheel in wheels:
-		wheel.brake_input = _brake_input
-		wheel.handbrake_input = _handbrake_input
-		if wheel.is_driven:
-			wheel.drivetrain_inertia = absf(gear_ratio) * motor.inertia
+	for axle in _axles:
+		for wheel in axle.get_wheels():
+			wheel.brake_input = _brake_input
+			wheel.handbrake_input = _handbrake_input
+			if axle.is_driven:
+				wheel.drivetrain_inertia = absf(gear_ratio) * motor.inertia
 
 
 func _apply_steering_input() -> void:
 	var steering_angle := _steering_input * max_steering_angle
-	if is_zero_approx(steering_angle):
-		for wheel in wheels:
-			if wheel.is_steering:
-				wheel.steering_angle = steering_angle
-		return
-
 	var turn_center := _calculate_turn_center()
-	for wheel in wheels:
-		if wheel.is_steering:
-			var turn_center_offset := wheel.position - turn_center
-			var turn_radius := -turn_center_offset.z / tan(steering_angle)
-			var ackermann_angle = atan(-turn_center_offset.z / (turn_radius + turn_center_offset.x))
-			wheel.steering_angle = ackermann_angle
+	for axle in _axles:
+		if axle.is_steering:
+			axle.steering_angle = steering_angle
+			axle.turn_center = turn_center
 
 
 func _apply_drag(state : PhysicsDirectBodyState3D) -> void:
@@ -196,10 +143,11 @@ func _apply_drag(state : PhysicsDirectBodyState3D) -> void:
 func _calculate_turn_center() -> Vector3:
 	var turn_center := Vector3.ZERO
 	var num_non_steering_wheels := 0
-	for wheel in wheels:
-		if not wheel.is_steering:
-			turn_center += wheel.position
-			num_non_steering_wheels += 1
+	for axle in _axles:
+		if not axle.is_steering:
+			for wheel in axle.get_wheels():
+				turn_center += wheel.position
+				num_non_steering_wheels += 1
 	turn_center /= num_non_steering_wheels
 	return turn_center
 
@@ -215,12 +163,21 @@ func _update_motor_audio() -> void:
 
 
 func _update_wheel_audio() -> void:
+	var num_wheels := 0
 	var slip := 0.0
-	for wheel in wheels:
-		slip += wheel.get_slip_velocity().length()
-	slip /= wheels.size()
+	for axle in _axles:
+		for wheel in axle.get_wheels():
+			slip += wheel.get_slip_velocity().length()
+			num_wheels += 1
+	slip /= num_wheels
 	wheel_audio_controller.slip = slip
 
 
-func _angular_velocity_to_rpm(velocity : float) -> float:
-	return 60.0 * velocity / TAU
+func _on_child_entered(child : Node) -> void:
+	if child is Axle:
+		_axles.push_back(child)
+
+
+func _on_child_exiting(child : Node) -> void:
+	if child is Axle:
+		_axles.erase(child)
