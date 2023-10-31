@@ -68,7 +68,7 @@ target_speeds = Array[float]([30.0, 60.0, 80.0, 100.0, 120.0, 140.0, 160.0, 180.
 reference_times = Array[float]([1.0, 2.6, 4.4, 6.6, 9.5, 13.6, 19.5, 30.5])
 
 [node name="vehicle" parent="." instance=ExtResource("4_80yr6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.0288, 0.467898, 47.099)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.029, 0.539763, 47.099)
 
 [node name="camera_target" type="Node3D" parent="vehicle"]
 

@@ -14,4 +14,4 @@ func _physics_process(_delta : float) -> void:
 		smoke.emitting = false
 	else:
 		smoke.emitting = true
-		smoke.global_position = wheel.get_collision_point()
+		smoke.global_position = wheel.get_contact_point()

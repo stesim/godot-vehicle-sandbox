@@ -19,7 +19,7 @@ extends Resource
 
 func calculate_traction(vehicle_state : PhysicsDirectBodyState3D, wheel : Wheel, available_brake_torque : float, applied_brake_torque : float) -> Vector2:
 	var wheel_right := wheel.global_transform.basis.x
-	var surface_normal := wheel.get_collision_normal()
+	var surface_normal := wheel.get_contact_normal()
 	var surface_forward := surface_normal.cross(wheel_right).normalized()
 	var surface_right := surface_forward.cross(surface_normal).normalized()
 
@@ -32,7 +32,7 @@ func calculate_traction(vehicle_state : PhysicsDirectBodyState3D, wheel : Wheel,
 	var grip := _calculate_grip(slip, local_contact_velocity)
 	var tire_load := wheel.get_wheel_load()
 	var wheel_normal := wheel_right.cross(surface_forward).normalized()
-	var camber_factor := maxf(0.0, surface_normal.dot(wheel_normal))
+	var camber_factor := absf(surface_normal.dot(wheel_normal))
 	var traction := camber_factor * tire_load * grip
 
 	var traction_limits := _calculate_traction_limits(vehicle_state, wheel, slip, surface_forward, surface_right)
@@ -73,7 +73,7 @@ func _calculate_grip(slip : Vector2, contact_velocity : Vector2) -> Vector2:
 
 
 func _calculate_traction_limits(vehicle_state : PhysicsDirectBodyState3D, wheel : Wheel, slip : Vector2, forward : Vector3, right : Vector3) -> Vector2:
-	var force_position := wheel.get_collision_point() - vehicle_state.transform.origin
+	var force_position := wheel.get_contact_point() - vehicle_state.transform.origin
 
 	var dv_rotation := -vehicle_state.step * wheel.radius * wheel.radius / wheel.get_effective_inertia()
 	var dv_contact_x := vehicle_state.step * (vehicle_state.inverse_mass + (vehicle_state.inverse_inertia_tensor * force_position.cross(forward)).cross(force_position).dot(forward))
