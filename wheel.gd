@@ -93,6 +93,10 @@ func get_contact_velocity() -> Vector3:
 	return _contact_velocity
 
 
+func get_suspension_length() -> float:
+	return _suspension_length
+
+
 func get_wheel_load() -> float:
 	return _wheel_load
 

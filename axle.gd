@@ -8,6 +8,8 @@ extends Node3D
 
 @export var differential : Differential
 
+@export var anti_roll_bar : AntiRollBar
+
 
 @export_subgroup("Input")
 
@@ -59,6 +61,9 @@ func _apply_suspension_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_
 	for wheel in _wheels:
 		wheel.apply_suspension_force(vehicle_state)
 
+	if anti_roll_bar != null:
+		_apply_anti_roll_bar_forces(vehicle_state)
+
 	var virtual_mass_per_wheel := virtual_mass / _wheels.size()
 	for wheel in _wheels:
 		if wheel.is_bottoming_out():
@@ -94,6 +99,20 @@ func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D) -> void:
 	for wheel in _wheels:
 		wheel.apply_drive_forces(vehicle_state)
 		wheel.apply_rolling_resistance(vehicle_state)
+
+
+func _apply_anti_roll_bar_forces(vehicle_state : PhysicsDirectBodyState3D) -> void:
+	var average_travel := 0.0
+	for wheel in _wheels:
+		average_travel += wheel.get_suspension_length()
+	average_travel /= _wheels.size()
+
+	anti_roll_bar.average_travel = average_travel
+	for wheel in _wheels:
+		var force := anti_roll_bar.calculate_force(wheel.get_suspension_length())
+		var up := wheel.global_transform.basis.y
+		var force_position := wheel.global_position - vehicle_state.transform.origin
+		vehicle_state.apply_force(force * up, force_position)
 
 
 func _on_child_entered(child : Node) -> void:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=65 format=3 uid="uid://bffl1enyve7sk"]
+[gd_scene load_steps=68 format=3 uid="uid://bffl1enyve7sk"]
 
 [ext_resource type="Script" path="res://vehicle.gd" id="1_guobo"]
 [ext_resource type="Resource" uid="uid://cwto72kqieatl" path="res://vehicles/mercedes_g_class/motor.tres" id="2_72vbb"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://cb5g8miqmixlq" path="res://assets/mercedes_g_class/mercedes_benz_g-class_w263_0.png" id="7_h2ax0"]
 [ext_resource type="Script" path="res://wheel.gd" id="8_6bur0"]
 [ext_resource type="Script" path="res://axle.gd" id="8_go1if"]
+[ext_resource type="Script" path="res://anti_roll_bar.gd" id="8_t63y6"]
 [ext_resource type="Resource" uid="uid://bjbidt2pvfu8l" path="res://vehicles/mercedes_g_class/suspension.tres" id="9_bvk33"]
 [ext_resource type="Resource" uid="uid://bjop5g44kwcmm" path="res://vehicles/mercedes_g_class/tire.tres" id="10_i278x"]
 [ext_resource type="Resource" uid="uid://cwrqb53t2ybcx" path="res://vehicles/mercedes_g_class/brake.tres" id="11_sd5d5"]
@@ -413,6 +414,11 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_pdbvp")
 
+[sub_resource type="Resource" id="Resource_r3m4n"]
+script = ExtResource("8_t63y6")
+stiffness = 60000.0
+average_travel = 0.0
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l63hl"]
 resource_name = "Material.006"
 cull_mode = 2
@@ -529,6 +535,11 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_0cndc")
 
+[sub_resource type="Resource" id="Resource_38ifg"]
+script = ExtResource("8_t63y6")
+stiffness = 30000.0
+average_travel = 0.0
+
 [sub_resource type="Curve" id="Curve_ajux4"]
 _data = [Vector2(0, 0), 0.0, 0.0409135, 0, 0, Vector2(1, 1), 0.240248, 0.0, 0, 0]
 point_count = 2
@@ -619,6 +630,7 @@ script = ExtResource("8_go1if")
 is_steering = true
 is_driven = true
 differential = ExtResource("4_4od2o")
+anti_roll_bar = SubResource("Resource_r3m4n")
 
 [node name="wheel_fl" type="Node3D" parent="front_axle" node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.775, 0, 0)
@@ -687,6 +699,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 1.45)
 script = ExtResource("8_go1if")
 is_driven = true
 differential = ExtResource("6_ohqhk")
+anti_roll_bar = SubResource("Resource_38ifg")
 
 [node name="wheel_rl" type="Node3D" parent="rear_axle" node_paths=PackedStringArray("visuals")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.775, 0, 0)
