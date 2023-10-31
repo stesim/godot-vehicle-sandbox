@@ -74,6 +74,9 @@ func shift_relative(gear_difference : int) -> void:
 func _update_automation(delta : float) -> void:
 	_remaining_shift_interval = move_toward(_remaining_shift_interval, 0.0, delta)
 
+	if is_shifting():
+		return
+
 	if gear > 0:
 		var optimal_gear := _find_gear_with_most_torque()
 		if gear != optimal_gear and (is_zero_approx(_remaining_shift_interval) or normalized_rpm_input > 1.0):
@@ -97,8 +100,7 @@ func _find_gear_with_most_torque() -> int:
 		else:
 			return i
 
-	# this should never be reached
-	return 0
+	return forward_gears.size()
 
 
 func _get_gear_ratio(gear_index : int) -> float:
