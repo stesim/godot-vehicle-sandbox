@@ -242,7 +242,8 @@ func _find_contact_point(space_state : PhysicsDirectSpaceState3D) -> void:
 	_contact_normal = Vector3.ZERO
 
 	_shape_cast_query.transform = Transform3D().rotated(Vector3.FORWARD, 0.5 * PI).translated(global_position)
-	_shape_cast_query.motion = -suspension.rest_length * global_transform.basis.y
+	var up := global_transform.basis.y
+	_shape_cast_query.motion = -suspension.rest_length * up
 	var results := space_state.cast_motion(_shape_cast_query)
 
 	var motion_fraction := results[1]
@@ -254,7 +255,9 @@ func _find_contact_point(space_state : PhysicsDirectSpaceState3D) -> void:
 		return
 
 	_is_in_contact = true
-	_contact_point = intersection.point
+	# HACK: move contact point to center of contact patch to avoid lateral drift if the reported
+	#       collision point is, for example, on the right side for all wheels
+	_contact_point = global_position + (intersection.point - global_position).project(up)
 	_contact_normal = intersection.normal
 
 
