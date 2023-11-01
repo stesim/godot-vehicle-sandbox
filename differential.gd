@@ -53,7 +53,7 @@ func update() -> void:
 	var torque_fraction_1 := 1.0 - torque_split
 	var torque_fraction_2 := 1.0 - torque_fraction_1
 
-	if not is_locked:
+	if not is_locked and absf(velocity_feedback_1 - velocity_feedback_2) > 0.01:
 		# limited slip implementation inspired by Jolt Physics
 		# https://github.com/jrouwe/JoltPhysics/blob/515933138c6b16d661452fb907a8a9bbb71cb848/Jolt/Physics/Vehicle/VehicleDifferential.cpp#L42
 		var unsigned_velocity_1 := absf(velocity_feedback_1)
