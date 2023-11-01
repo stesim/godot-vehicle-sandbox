@@ -213,7 +213,7 @@ shape = SubResource("BoxShape3D_hc81o")
 mesh = SubResource("BoxMesh_0oeik")
 
 [node name="obstacle9" type="StaticBody3D" parent="."]
-transform = Transform3D(-4.37114e-08, -0.999999, 0, 1, -4.37113e-08, 0, 0, 0, 0.999999, 24, -2.99656, 0)
+transform = Transform3D(-4.37114e-08, -0.999999, 0, 1, -4.37113e-08, 0, 0, 0, 0.999999, 32, -2.99656, 0)
 
 [node name="shape" type="CollisionShape3D" parent="obstacle9"]
 shape = SubResource("CylinderShape3D_jps17")
@@ -222,7 +222,7 @@ shape = SubResource("CylinderShape3D_jps17")
 mesh = SubResource("CylinderMesh_n7si7")
 
 [node name="obstacle10" type="StaticBody3D" parent="."]
-transform = Transform3D(-4.37114e-08, -0.999999, 0, 1, -4.37113e-08, 0, 0, 0, 0.999999, 24, -3.6, 18.06)
+transform = Transform3D(-4.37114e-08, -0.999999, 0, 1, -4.37113e-08, 0, 0, 0, 0.999999, 32, -3.6, 18.06)
 
 [node name="shape" type="CollisionShape3D" parent="obstacle10"]
 shape = SubResource("CylinderShape3D_jps17")

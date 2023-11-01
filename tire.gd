@@ -57,17 +57,20 @@ func calculate_traction(vehicle_state : PhysicsDirectBodyState3D, wheel : Wheel,
 
 
 func _calculate_grip(slip : Vector2, contact_velocity : Vector2) -> Vector2:
-	var slip_ratio := slip.x / maxf(0.001, contact_velocity.x)
-	var slip_angle := -atan2(contact_velocity.y, absf(contact_velocity.y))
+	if slip.is_zero_approx():
+		return Vector2.ZERO
+
+	var slip_ratio := slip.x / absf(contact_velocity.x) if absf(slip.x) > 0.01 else 0.0
+	var slip_angle := -atan2(contact_velocity.y, absf(contact_velocity.x)) if contact_velocity.length() > 0.01 else 0.0
 
 	var weight := Vector2.ONE
 	if magic_tweak_factor > 0.0:
 		weight = weight.slerp(slip.normalized().abs(), magic_tweak_factor)
 
-	var grip := weight * Vector2(
+	var grip := (weight * Vector2(
 		signf(slip_ratio) * _sample_curve(longitudinal_traction_curve, longitudinal_traction_curve_scale, absf(slip_ratio)),
 		signf(slip_angle) * _sample_curve(lateral_traction_curve, lateral_traction_curve_scale, absf(slip_angle))
-	).limit_length(friction_limit)
+	)).limit_length(friction_limit)
 
 	return grip
 
