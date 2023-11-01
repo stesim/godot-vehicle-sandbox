@@ -6,7 +6,7 @@ extends Resource
 
 @export_range(0.0, 2.0, 0.01, "or_greater") var friction_limit := 1.0
 
-@export_range(0.0, 1.0) var magic_tweak_factor := 0.5
+@export_range(0.0, 1.0) var magic_tweak_factor := 1.0
 
 @export var longitudinal_traction_curve : Curve
 
@@ -65,7 +65,8 @@ func _calculate_grip(slip : Vector2, contact_velocity : Vector2) -> Vector2:
 
 	var weight := Vector2.ONE
 	if magic_tweak_factor > 0.0:
-		weight = weight.slerp(slip.normalized().abs(), magic_tweak_factor)
+		var slip_weight := slip.abs().normalized()
+		weight = slip_weight if magic_tweak_factor == 1.0 else weight.slerp(slip_weight, magic_tweak_factor)
 
 	var grip := (weight * Vector2(
 		signf(slip_ratio) * _sample_curve(longitudinal_traction_curve, longitudinal_traction_curve_scale, absf(slip_ratio)),
