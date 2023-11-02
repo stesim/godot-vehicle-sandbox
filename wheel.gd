@@ -22,6 +22,7 @@ extends Node3D
 
 @export var enforce_visual_bottom_out := true
 
+
 @export_subgroup("Input")
 
 @export_range(0.0, 4.0, 0.01, "or_greater") var drivetrain_inertia := 0.0
@@ -66,7 +67,8 @@ var _torque_feedback := 0.0
 
 
 func _ready() -> void:
-	_suspension_length = suspension.rest_length
+	if suspension != null:
+		_suspension_length = suspension.rest_length
 
 
 func get_angular_velocity() -> float:
@@ -117,12 +119,12 @@ func is_bottoming_out() -> bool:
 	return _suspension_length < 0.0
 
 
-func apply_suspension_force(vehicle_state : PhysicsDirectBodyState3D) -> void:
+func apply_suspension_force(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
 	_find_contact_point(vehicle_state.get_space_state())
 
 	if not _is_in_contact:
-		_suspension_length = suspension.rest_length
 		_wheel_load = 0.0
+		_suspension_length = suspension.rest_length if suspension != null else 0.0
 		return
 
 	var up := global_transform.basis.y
@@ -131,30 +133,28 @@ func apply_suspension_force(vehicle_state : PhysicsDirectBodyState3D) -> void:
 	_suspension_length = new_suspension_length
 	_contact_velocity = vehicle_state.get_velocity_at_local_position(_contact_point - vehicle_state.transform.origin)
 
-	var suspension_force := suspension.calculate_force(vehicle_state, new_suspension_length, suspension_velocity)
+	if suspension == null:
+		_wheel_load = maxf(0.0, -vehicle_state.total_gravity.dot(up)) * virtual_mass
+	else:
+		var suspension_force := suspension.calculate_force(vehicle_state, new_suspension_length, suspension_velocity)
 
-	var force_vector := suspension_force * global_transform.basis.y
-	var force_position := global_position - vehicle_state.transform.origin
-	vehicle_state.apply_force(force_vector, force_position)
+		var force_vector := suspension_force * global_transform.basis.y
+		var force_position := global_position - vehicle_state.transform.origin
+		vehicle_state.apply_force(force_vector, force_position)
 
-	_wheel_load = suspension_force
+		_wheel_load = suspension_force
 
-
-func apply_bottom_out_force(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
-	var up := global_transform.basis.y
-	var excess_linear_velocity := maxf(0.0, -_contact_velocity.dot(up))
-	var force := virtual_mass * excess_linear_velocity / vehicle_state.step * up
-	var force_position := global_position - vehicle_state.transform.origin
-	vehicle_state.apply_force(force, force_position)
+	if is_bottoming_out():
+		_apply_bottom_out_force(vehicle_state, virtual_mass)
 
 
 func apply_drive_forces(vehicle_state : PhysicsDirectBodyState3D) -> void:
 	_torque_feedback = 0.0
-	_brake_torque = brake_input * brake.max_torque
+	_brake_torque = brake_input * brake.max_torque if brake != null else 0.0
 	if has_handbrake:
 		_brake_torque = maxf(_brake_torque, handbrake_input * brake.max_handbrake_torque)
 
-	if traction_control_enabled:
+	if traction_control_enabled and brake != null:
 		_apply_traction_control(vehicle_state)
 
 	var applied_brake_torque := 0.0
@@ -179,6 +179,14 @@ func apply_rolling_resistance(vehicle_state : PhysicsDirectBodyState3D) -> void:
 	if rolling_resistance / force_limit > 1.0:
 		rolling_resistance = force_limit
 	vehicle_state.apply_central_force(rolling_resistance * forward)
+
+
+func _apply_bottom_out_force(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
+	var up := global_transform.basis.y
+	var excess_linear_velocity := maxf(0.0, -_contact_velocity.dot(up))
+	var force := virtual_mass * excess_linear_velocity / vehicle_state.step * up
+	var force_position := global_position - vehicle_state.transform.origin
+	vehicle_state.apply_force(force, force_position)
 
 
 func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, applied_brake_torque : float) -> void:
@@ -241,14 +249,15 @@ func _find_contact_point(space_state : PhysicsDirectSpaceState3D) -> void:
 	_contact_point = Vector3.ZERO
 	_contact_normal = Vector3.ZERO
 
-	_shape_cast_query.transform = Transform3D().rotated(Vector3.FORWARD, 0.5 * PI).translated(global_position)
 	var up := global_transform.basis.y
-	_shape_cast_query.motion = -suspension.rest_length * up
-	var results := space_state.cast_motion(_shape_cast_query)
+	_shape_cast_query.transform = Transform3D().rotated(Vector3.FORWARD, 0.5 * PI).translated(global_position)
+	if suspension != null:
+		_shape_cast_query.motion = -suspension.rest_length * up
+		var results := space_state.cast_motion(_shape_cast_query)
 
-	var motion_fraction := results[1]
-	if not is_equal_approx(motion_fraction, 1.0):
-		_shape_cast_query.transform.origin += motion_fraction * _shape_cast_query.motion
+		var motion_fraction := results[1]
+		if not is_equal_approx(motion_fraction, 1.0):
+			_shape_cast_query.transform.origin += motion_fraction * _shape_cast_query.motion
 
 	var intersection := space_state.get_rest_info(_shape_cast_query)
 	if intersection.is_empty():

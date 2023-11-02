@@ -49,7 +49,8 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	transmission.torque_curve = motor.power_torque_curve
+	if transmission != null and motor != null:
+		transmission.torque_curve = motor.power_torque_curve
 
 
 func _process(delta : float) -> void:
@@ -58,17 +59,19 @@ func _process(delta : float) -> void:
 
 
 func _integrate_forces(state : PhysicsDirectBodyState3D) -> void:
-	_apply_drive_input(state.step)
+	if motor != null:
+		_apply_drive_input(state.step)
 	for axle in _axles:
 		axle.update(state, mass / _axles.size())
 	_apply_drag(state)
 
 
 func _unhandled_input(event : InputEvent) -> void:
-	if event.is_action_pressed(&"shift_up"):
-		transmission.shift_relative(+1)
-	elif event.is_action_pressed(&"shift_down"):
-		transmission.shift_relative(-1)
+	if transmission != null:
+		if event.is_action_pressed(&"shift_up"):
+			transmission.shift_relative(+1)
+		elif event.is_action_pressed(&"shift_down"):
+			transmission.shift_relative(-1)
 
 
 func _update_inputs(delta : float) -> void:
@@ -81,9 +84,11 @@ func _update_inputs(delta : float) -> void:
 
 
 func _apply_drive_input(delta : float) -> void:
-	motor.throttle = _engine_input if not transmission.is_shifting() else 0.0
+	motor.throttle = _engine_input
+	if transmission != null and transmission.is_shifting():
+		motor.throttle = 0.0
 
-	var gear_ratio := transmission.get_current_gear_ratio()
+	var gear_ratio := transmission.get_current_gear_ratio() if transmission != null else 1.0
 	motor.is_engaged = not is_zero_approx(gear_ratio)
 
 	if not motor.is_engaged:
@@ -95,15 +100,18 @@ func _apply_drive_input(delta : float) -> void:
 				for wheel in axle.get_wheels():
 					feedback_rpm = minf(feedback_rpm, gear_ratio * wheel.get_rpm())
 		motor.rpm_feedback = feedback_rpm
+		motor.update(delta)
 
-	motor.update(delta)
+	var torque_output = motor.get_torque_output()
 
-	transmission.torque_input = motor.get_torque_output()
-	transmission.normalized_rpm_input = motor.rpm / motor.normalization_rpm
-	transmission.update(delta)
+	if transmission != null:
+		transmission.torque_input = motor.get_torque_output()
+		transmission.normalized_rpm_input = motor.rpm / motor.normalization_rpm
+		transmission.update(delta)
+		torque_output = transmission.get_torque_output()
 
-	if motor.is_engaged and center_differential != null and _axles.size() == 2:
-		center_differential.torque_input = transmission.get_torque_output()
+	if center_differential != null and _axles.size() == 2 and motor.is_engaged:
+		center_differential.torque_input = torque_output
 		center_differential.velocity_feedback_1 = _axles[0].get_angular_velocity_feedback()
 		center_differential.velocity_feedback_2 = _axles[1].get_angular_velocity_feedback()
 		center_differential.torque_feedback_1 = _axles[0].get_torque_feedback()
@@ -114,7 +122,7 @@ func _apply_drive_input(delta : float) -> void:
 		_axles[1].torque_input = center_differential.get_torque_output_2()
 	else:
 		for axle in _axles:
-			axle.torque_input = transmission.get_torque_output()
+			axle.torque_input = torque_output / _axles.size()
 
 	for axle in _axles:
 		for wheel in axle.get_wheels():
@@ -153,13 +161,14 @@ func _calculate_turn_center() -> Vector3:
 
 
 func _update_audio() -> void:
-	_update_motor_audio()
-	_update_wheel_audio()
+	if motor_audio_controller != null and motor != null:
+		_update_motor_audio()
+	if wheel_audio_controller != null:
+		_update_wheel_audio()
 
 
 func _update_motor_audio() -> void:
-	if motor_audio_controller != null:
-		motor_audio_controller.rpm = motor.rpm
+	motor_audio_controller.rpm = motor.rpm
 
 
 func _update_wheel_audio() -> void:

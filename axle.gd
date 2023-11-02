@@ -58,16 +58,12 @@ func _init() -> void:
 
 
 func _apply_suspension_forces(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
+	var virtual_mass_per_wheel := virtual_mass / _wheels.size()
 	for wheel in _wheels:
-		wheel.apply_suspension_force(vehicle_state)
+		wheel.apply_suspension_force(vehicle_state, virtual_mass_per_wheel)
 
 	if anti_roll_bar != null:
 		_apply_anti_roll_bar_forces(vehicle_state)
-
-	var virtual_mass_per_wheel := virtual_mass / _wheels.size()
-	for wheel in _wheels:
-		if wheel.is_bottoming_out():
-			wheel.apply_bottom_out_force(vehicle_state, virtual_mass_per_wheel)
 
 
 func _apply_steering_input() -> void:
