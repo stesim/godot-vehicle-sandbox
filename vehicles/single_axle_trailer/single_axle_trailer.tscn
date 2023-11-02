@@ -1,0 +1,115 @@
+[gd_scene load_steps=17 format=3 uid="uid://csjfnjfxjgbus"]
+
+[ext_resource type="Script" path="res://vehicle.gd" id="1_3lts7"]
+[ext_resource type="Script" path="res://axle.gd" id="2_28tlm"]
+[ext_resource type="Script" path="res://wheel.gd" id="3_gsn38"]
+[ext_resource type="Resource" uid="uid://bjop5g44kwcmm" path="res://vehicles/mercedes_g_class/tire.tres" id="4_kywd0"]
+[ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://assets/textures/texture_07.png" id="4_uenr8"]
+[ext_resource type="Script" path="res://brake.gd" id="5_mhwf3"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_0cuqr"]
+friction = 0.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2wljo"]
+size = Vector3(1, 0.5, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_b4b5y"]
+size = Vector3(1, 0.5, 2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_g0gr8"]
+size = Vector3(0.1, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_vp0nc"]
+size = Vector3(0.1, 0.1, 1)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_n15ai"]
+height = 0.15
+radius = 0.32
+
+[sub_resource type="BoxMesh" id="BoxMesh_7qymy"]
+size = Vector3(1.42, 0.06, 0.06)
+
+[sub_resource type="Resource" id="Resource_pgmja"]
+script = ExtResource("5_mhwf3")
+max_torque = 4000.0
+max_handbrake_torque = 2000.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gjjg3"]
+albedo_texture = ExtResource("4_uenr8")
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_u00ca"]
+material = SubResource("StandardMaterial3D_gjjg3")
+top_radius = 0.33
+bottom_radius = 0.33
+height = 0.15
+radial_segments = 24
+
+[node name="single_axle_trailer" type="RigidBody3D"]
+mass = 3500.0
+physics_material_override = SubResource("PhysicsMaterial_0cuqr")
+can_sleep = false
+linear_damp_mode = 1
+script = ExtResource("1_3lts7")
+frontal_area = 0.7
+drag_coefficient = 0.1
+
+[node name="body_shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("BoxShape3D_2wljo")
+
+[node name="mesh" type="MeshInstance3D" parent="body_shape"]
+mesh = SubResource("BoxMesh_b4b5y")
+skeleton = NodePath("../..")
+
+[node name="hitch_shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -1.25)
+shape = SubResource("BoxShape3D_g0gr8")
+
+[node name="mesh" type="MeshInstance3D" parent="hitch_shape"]
+mesh = SubResource("BoxMesh_vp0nc")
+skeleton = NodePath("../..")
+
+[node name="left_wheel_shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, -0.71, 0.1, 0)
+shape = SubResource("CylinderShape3D_n15ai")
+
+[node name="right_wheel_shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0.71, 0.1, 0)
+shape = SubResource("CylinderShape3D_n15ai")
+
+[node name="axle" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+script = ExtResource("2_28tlm")
+
+[node name="mesh" type="MeshInstance3D" parent="axle"]
+mesh = SubResource("BoxMesh_7qymy")
+skeleton = NodePath("../..")
+
+[node name="left_wheel" type="Node3D" parent="axle" node_paths=PackedStringArray("visuals")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.71, 0, 0)
+script = ExtResource("3_gsn38")
+visuals = NodePath("mesh")
+radius = 0.33
+width = 0.15
+inertia = 0.5
+tire = ExtResource("4_kywd0")
+brake = SubResource("Resource_pgmja")
+
+[node name="mesh" type="MeshInstance3D" parent="axle/left_wheel"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_u00ca")
+
+[node name="right_wheel" type="Node3D" parent="axle" node_paths=PackedStringArray("visuals")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.71, 0, 0)
+script = ExtResource("3_gsn38")
+visuals = NodePath("mesh")
+radius = 0.33
+width = 0.15
+inertia = 0.5
+tire = ExtResource("4_kywd0")
+brake = SubResource("Resource_pgmja")
+
+[node name="mesh" type="MeshInstance3D" parent="axle/right_wheel"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("CylinderMesh_u00ca")
+skeleton = NodePath("../../left_wheel")

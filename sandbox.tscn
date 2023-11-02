@@ -1,10 +1,11 @@
-[gd_scene load_steps=21 format=3 uid="uid://2xgd252vy5bv"]
+[gd_scene load_steps=22 format=3 uid="uid://2xgd252vy5bv"]
 
 [ext_resource type="Script" path="res://sandbox.gd" id="1_nf78t"]
 [ext_resource type="Script" path="res://game_controller.gd" id="2_eqkow"]
 [ext_resource type="Script" path="res://acceleration_timer.gd" id="3_twb0k"]
 [ext_resource type="PackedScene" uid="uid://bffl1enyve7sk" path="res://vehicles/mercedes_g_class/mercedes_g_class.tscn" id="4_80yr6"]
 [ext_resource type="Script" path="res://camera.gd" id="5_no0k6"]
+[ext_resource type="PackedScene" uid="uid://csjfnjfxjgbus" path="res://vehicles/single_axle_trailer/single_axle_trailer.tscn" id="9_qfba5"]
 [ext_resource type="Script" path="res://camera_arm.gd" id="10_2ofnf"]
 [ext_resource type="Script" path="res://camera_crane.gd" id="10_w6w1k"]
 [ext_resource type="Texture2D" uid="uid://d18y24ep1vwg3" path="res://assets/textures/texture_07.png" id="14_ejoip"]
@@ -68,7 +69,7 @@ target_speeds = Array[float]([30.0, 60.0, 80.0, 100.0, 120.0, 140.0, 160.0, 180.
 reference_times = Array[float]([1.0, 2.6, 4.4, 6.6, 9.5, 13.6, 19.5, 30.5])
 
 [node name="vehicle" parent="." instance=ExtResource("4_80yr6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15.029, 0.539763, 47.099)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0.5, 48)
 
 [node name="camera_target" type="Node3D" parent="vehicle"]
 
@@ -91,6 +92,19 @@ transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 1, 
 
 [node name="camera_view_left" type="Marker3D" parent="vehicle"]
 transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -6, 1, 0)
+
+[node name="hitch_joint" type="JoltConeTwistJoint3D" parent="."]
+swing_limit_enabled = true
+swing_limit_span = 1.5708
+twist_limit_enabled = true
+twist_limit_span = 1.0472
+node_a = NodePath("../vehicle")
+node_b = NodePath("../single_axle_trailer")
+transform = Transform3D(-4.37114e-08, 1, 4.37114e-08, 0, -4.37114e-08, 1, 1, 4.37114e-08, 1.91069e-15, 15, 0.7, 50.3)
+
+[node name="single_axle_trailer" parent="." instance=ExtResource("9_qfba5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0.4, 52)
+mass = 7500.0
 
 [node name="camera_crane" type="Node3D" parent="." node_paths=PackedStringArray("subject")]
 script = ExtResource("10_w6w1k")

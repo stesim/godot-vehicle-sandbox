@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_a2h3e")
 rest_length = 0.2
-stiffness = 50000.0
+stiffness = 60000.0
 damping = 5000.0
