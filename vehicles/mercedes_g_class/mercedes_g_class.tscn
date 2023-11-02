@@ -565,7 +565,7 @@ size = Vector3(1.53, 1.163, 2.635)
 [node name="mercedes_g_class" type="RigidBody3D" node_paths=PackedStringArray("motor_audio_controller", "wheel_audio_controller")]
 mass = 2500.0
 center_of_mass_mode = 1
-center_of_mass = Vector3(0, 0.2, 0)
+center_of_mass = Vector3(0, 0.5, 0)
 physics_material_override = SubResource("PhysicsMaterial_3l5ve")
 can_sleep = false
 linear_damp_mode = 1
