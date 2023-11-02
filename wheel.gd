@@ -144,7 +144,8 @@ func apply_suspension_force(vehicle_state : PhysicsDirectBodyState3D, virtual_ma
 
 		_wheel_load = suspension_force
 
-	if is_bottoming_out():
+	# HACK: only handle bottoming out when there is a suspension; simulation becomes unstable otherwise
+	if is_bottoming_out() and suspension != null:
 		_apply_bottom_out_force(vehicle_state, virtual_mass)
 
 

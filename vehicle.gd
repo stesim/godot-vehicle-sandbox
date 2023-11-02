@@ -59,8 +59,7 @@ func _process(delta : float) -> void:
 
 
 func _integrate_forces(state : PhysicsDirectBodyState3D) -> void:
-	if motor != null:
-		_apply_drive_input(state.step)
+	_apply_drive_input(state.step)
 	for axle in _axles:
 		axle.update(state, mass / _axles.size())
 	_apply_drag(state)
@@ -84,25 +83,28 @@ func _update_inputs(delta : float) -> void:
 
 
 func _apply_drive_input(delta : float) -> void:
-	motor.throttle = _engine_input
-	if transmission != null and transmission.is_shifting():
-		motor.throttle = 0.0
-
 	var gear_ratio := transmission.get_current_gear_ratio() if transmission != null else 1.0
-	motor.is_engaged = not is_zero_approx(gear_ratio)
+	var torque_output = 0.0
 
-	if not motor.is_engaged:
-		motor.rpm_feedback = 0.0
-	else:
-		var feedback_rpm := INF
-		for axle in _axles:
-			if axle.is_driven:
-				for wheel in axle.get_wheels():
-					feedback_rpm = minf(feedback_rpm, gear_ratio * wheel.get_rpm())
-		motor.rpm_feedback = feedback_rpm
-		motor.update(delta)
+	if motor != null:
+		motor.throttle = _engine_input
+		if transmission != null and transmission.is_shifting():
+			motor.throttle = 0.0
 
-	var torque_output = motor.get_torque_output()
+		motor.is_engaged = not is_zero_approx(gear_ratio)
+
+		if not motor.is_engaged:
+			motor.rpm_feedback = 0.0
+		else:
+			var feedback_rpm := INF
+			for axle in _axles:
+				if axle.is_driven:
+					for wheel in axle.get_wheels():
+						feedback_rpm = minf(feedback_rpm, gear_ratio * wheel.get_rpm())
+			motor.rpm_feedback = feedback_rpm
+			motor.update(delta)
+
+		torque_output = motor.get_torque_output()
 
 	if transmission != null:
 		transmission.torque_input = motor.get_torque_output()
@@ -124,12 +126,13 @@ func _apply_drive_input(delta : float) -> void:
 		for axle in _axles:
 			axle.torque_input = torque_output / _axles.size()
 
+	var drivetrain_inertia := absf(gear_ratio) * motor.inertia if motor != null else 0.0
 	for axle in _axles:
 		for wheel in axle.get_wheels():
 			wheel.brake_input = _brake_input
 			wheel.handbrake_input = _handbrake_input
 			if axle.is_driven:
-				wheel.drivetrain_inertia = absf(gear_ratio) * motor.inertia
+				wheel.drivetrain_inertia = drivetrain_inertia
 
 
 func _apply_steering_input() -> void:
