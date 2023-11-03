@@ -109,6 +109,46 @@ Shifting is possible even if the transmission is automated, but gear changes bet
 - Top action button - change camera
 
 
+## Known issues
+
+### Wheels do not collide with and glide over obstacles in an unrealistic manner.
+
+This is a result of the ray/shape-cast approach used to simulate the wheels.
+They do not have their own collision shapes and cannot be handled by the physics engine.
+All interactions with the environment, such as the traction forces, must be coded manually.
+While wheel collisions could be handled to a certain degree, doing so is difficult and might not even make a big difference in some cases.
+For now, it's out of the scope of this project.
+
+
+### The automated transmission is scuffed.
+
+The automation algorithm for the transmission was hacked together quickly, just to have some kind of automatic transmission for easier testing.
+It attempts to always select the gear that will provide optimal acceleration.
+Unfortunately, sometimes it will shift to unnecessarily high gears.
+I have not looked into the issue, since it's quite low-priority for me.
+
+
+### Vehicle struggles to move when motor provides extremely high torque.
+
+Unfortunately, I have not yet looked into the issue yet, but I suspect it might be a case of the engine immediately hitting the RPM limit, cutting off, hitting the limit, cutting off... you get the point.
+There shouldn't be a problem with realistic torque values.
+The example vehicle with a real-life engine peak torque of 700 Nm seems to work properly even with a peak torque of 2700 Nm.
+
+
+### There is no explicit clutch.
+
+A clutch is currently not being simulated.
+The engine is either fully engaged or fully disengaged from the drivetrain at any point in time.
+In addition, the simulated engine RPM are artificially restricted to not fall below the defined idle RPM, even if the wheel RPM are lower.
+Overall, this acts like a clutch when accelerating from a standstill, but is not physically correct.
+As a side-effect, the engine cannot be stalled.
+
+
+### Braking keeps locking up the wheels.
+
+Yes, there is no ABS yet.
+
+
 ## Attribution
 
 The provided example vehicle uses the following third-party assets.
@@ -116,3 +156,7 @@ The provided example vehicle uses the following third-party assets.
 - "Mercedes Benz G-class W263" (https://skfb.ly/6SHrP) by Lexyc16 is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 - "Car tire squeal skid loop" (https://opengameart.org/content/car-tire-squeal-skid-loop) by qubodup is licensed under Creative Commons Attribution (CC-BY 3.0) (http://creativecommons.org/licenses/by/3.0/).
 - "Motor Loop 2" (https://pixabay.com/sound-effects/motor-loop-2-103532/) by Pixabay is licensed under Pixabay Content License (https://pixabay.com/service/license-summary/).
+
+Specs for the example vehicle have been retrieved from the following sources.
+
+- [https://www.automobile-catalog.com/car/2021/2968940/mercedes-benz_g_400_d.html](https://www.automobile-catalog.com/car/2021/2968940/mercedes-benz_g_400_d.html)
