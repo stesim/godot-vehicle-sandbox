@@ -9,7 +9,7 @@ Vehicles are to be made up of different configurable building blocks to allow th
 
 Vehicles are created from a set of nodes and resources.
 In general, the nodes are supposed to connect the various components, while the resources are supposed to be independent, so as to be potentially reusable in multiple contexts.
-For example, `Axle` depends on `Wheel`, but `Transmission` does not depend on `Motor` or vice versa.
+For example, `Axle` depends on `Wheel`, but `Transmission` does not depend on `Motor` or any of the other components.
 
 
 ### Nodes
@@ -79,6 +79,7 @@ Vehicle (Motor, Transmission, Differential)
   ├ Wheel (Tire, Suspension, Brake)
   │ └ Mesh
   └ Wheel (Tire, Suspension, Brake)
+    └ Mesh
 ```
 
 For concrete examples see the [/vehicles](vehicles) directory.
@@ -86,7 +87,7 @@ For concrete examples see the [/vehicles](vehicles) directory.
 
 ## Input
 
-See the `Project Settings > Input Map` for all input mappings, but here is a short summary.
+See `Project Settings > Input Map` for all input mappings, but here is a short summary.
 
 Note that holding brake does *not* automatically reverse.
 You need to manually shift into reverse and then accelerate as usual.
