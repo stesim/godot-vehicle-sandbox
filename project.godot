@@ -93,7 +93,7 @@ toggle_timer={
 
 [physics]
 
-common/physics_ticks_per_second=128
+common/physics_ticks_per_second=120
 3d/physics_engine="JoltPhysics3D"
 
 [rendering]

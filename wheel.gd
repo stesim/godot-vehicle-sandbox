@@ -2,25 +2,46 @@ class_name Wheel
 extends Node3D
 
 
+enum ContactProbeType {
+	RAY_CAST,
+	CYLINDER_CAST,
+}
+
+
 @export var visuals : Node3D
+
+@export var enforce_visual_bottom_out := true
+
+@export var contact_probe_type := ContactProbeType.CYLINDER_CAST :
+	set(value):
+		contact_probe_type = value
+		_recreate_contact_probe()
 
 @export var has_handbrake := false
 
-@export_range(0.0, 1.0, 0.01, "or_greater") var radius := 0.4
+@export_range(0.0, 1.0, 0.01, "or_greater") var radius := 0.4 :
+	set(value):
+		radius = value
+		if _contact_probe != null:
+			_contact_probe.radius = radius
 
-@export_range(0.0, 1.0, 0.01, "or_greater") var width := 0.3
+@export_range(0.0, 1.0, 0.01, "or_greater") var width := 0.3 :
+	set(value):
+		width = value
+		if _contact_probe != null:
+			_contact_probe.width = width
 
 @export_range(0.0, 2.0, 0.01, "or_greater") var inertia := 1.0
 
 @export_range(0.0, 1.0, 0.01, "or_greater") var traction_control_slip_ratio_threshold := 0.2
+
+@export var traction_control_enabled := true
 
 @export var suspension : Suspension
 
 @export var tire : Tire
 
 @export var brake : Brake
-
-@export var enforce_visual_bottom_out := true
 
 
 @export_subgroup("Input")
@@ -39,14 +60,8 @@ extends Node3D
 
 @export_range(0.0, 1.0) var handbrake_input := 0.0
 
-@export var traction_control_enabled := true
 
-
-var _is_in_contact := false
-
-var _contact_point := Vector3.ZERO
-
-var _contact_normal := Vector3.ZERO
+var _contact_probe : Node
 
 var _suspension_length := 0.0
 
@@ -63,10 +78,9 @@ var _slip := Vector2.ZERO
 var _torque_feedback := 0.0
 
 
-@onready var _shape_cast_query := _create_shape_cast_query()
-
-
 func _ready() -> void:
+	if _contact_probe == null:
+		_recreate_contact_probe()
 	if suspension != null:
 		_suspension_length = suspension.rest_length
 
@@ -84,11 +98,11 @@ func get_slip_velocity() -> Vector2:
 
 
 func get_contact_point() -> Vector3:
-	return _contact_point
+	return _contact_probe.get_contact_point()
 
 
 func get_contact_normal() -> Vector3:
-	return _contact_normal
+	return _contact_probe.get_contact_normal()
 
 
 func get_contact_velocity() -> Vector3:
@@ -112,7 +126,7 @@ func get_effective_inertia() -> float:
 
 
 func is_in_contact() -> bool:
-	return _is_in_contact
+	return _contact_probe.is_in_contact()
 
 
 func is_bottoming_out() -> bool:
@@ -120,18 +134,20 @@ func is_bottoming_out() -> bool:
 
 
 func apply_suspension_force(vehicle_state : PhysicsDirectBodyState3D, virtual_mass : float) -> void:
-	_find_contact_point(vehicle_state.get_space_state())
+	_contact_probe.distance = suspension.rest_length
+	_contact_probe.update()
 
-	if not _is_in_contact:
+	if not is_in_contact():
 		_wheel_load = 0.0
 		_suspension_length = suspension.rest_length if suspension != null else 0.0
 		return
 
 	var up := global_transform.basis.y
-	var new_suspension_length := (global_position - _contact_point).dot(up) - radius
+	var contact_point : Vector3 = _contact_probe.get_contact_point()
+	var new_suspension_length := (global_position - contact_point).dot(up) - radius
 	var suspension_velocity := (new_suspension_length - _suspension_length) / vehicle_state.step
 	_suspension_length = new_suspension_length
-	_contact_velocity = vehicle_state.get_velocity_at_local_position(_contact_point - vehicle_state.transform.origin)
+	_contact_velocity = vehicle_state.get_velocity_at_local_position(contact_point - vehicle_state.transform.origin)
 
 	if suspension == null:
 		_wheel_load = maxf(0.0, -vehicle_state.total_gravity.dot(up)) * virtual_mass
@@ -191,8 +207,9 @@ func _apply_bottom_out_force(vehicle_state : PhysicsDirectBodyState3D, virtual_m
 
 
 func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, applied_brake_torque : float) -> void:
-	var forward := _contact_normal.cross(global_transform.basis.x).normalized()
-	var right := forward.cross(_contact_normal).normalized()
+	var contact_normal : Vector3 = _contact_probe.get_contact_normal()
+	var forward := contact_normal.cross(global_transform.basis.x).normalized()
+	var right := forward.cross(contact_normal).normalized()
 
 	_slip = _calculate_slip(forward, right)
 
@@ -203,14 +220,15 @@ func _apply_tire_forces(vehicle_state : PhysicsDirectBodyState3D, applied_brake_
 	_torque_feedback += feedback_torque
 
 	var traction_force := traction.x * forward + traction.y * right
-	var force_position := _contact_point - vehicle_state.transform.origin
+	var force_position : Vector3 = _contact_probe.get_contact_point() - vehicle_state.transform.origin
 	vehicle_state.apply_force(traction_force, force_position)
 
 	_slip = _calculate_slip(forward, right)
 
 
 func _apply_traction_control(vehicle_state : PhysicsDirectBodyState3D) -> void:
-	var forward := _contact_normal.cross(global_transform.basis.x).normalized()
+	var contact_normal : Vector3 = _contact_probe.get_contact_normal()
+	var forward := contact_normal.cross(global_transform.basis.x).normalized()
 	var forward_velocity := _contact_velocity.dot(forward)
 	if absf(forward_velocity) < 0.1:
 		forward_velocity = signf(forward_velocity) * 0.1
@@ -245,32 +263,6 @@ func _calculate_slip(forward : Vector3, right : Vector3) -> Vector2:
 	return slip
 
 
-func _find_contact_point(space_state : PhysicsDirectSpaceState3D) -> void:
-	_is_in_contact = false
-	_contact_point = Vector3.ZERO
-	_contact_normal = Vector3.ZERO
-
-	var up := global_transform.basis.y
-	_shape_cast_query.transform = Transform3D().rotated(Vector3.FORWARD, 0.5 * PI).translated(global_position)
-	if suspension != null:
-		_shape_cast_query.motion = -suspension.rest_length * up
-		var results := space_state.cast_motion(_shape_cast_query)
-
-		var motion_fraction := results[1]
-		if not is_equal_approx(motion_fraction, 1.0):
-			_shape_cast_query.transform.origin += motion_fraction * _shape_cast_query.motion
-
-	var intersection := space_state.get_rest_info(_shape_cast_query)
-	if intersection.is_empty():
-		return
-
-	_is_in_contact = true
-	# HACK: move contact point to center of contact patch to avoid lateral drift if the reported
-	#       collision point is, for example, on the right side for all wheels
-	_contact_point = global_position + (intersection.point - global_position).project(up)
-	_contact_normal = intersection.normal
-
-
 func _process(delta : float) -> void:
 	_update_visuals(delta)
 
@@ -285,17 +277,15 @@ func _update_visuals(delta : float) -> void:
 	visuals.rotate(Vector3.LEFT, _angular_velocity * delta)
 
 
-func _create_shape_cast_query() -> PhysicsShapeQueryParameters3D:
-	var vehicle := get_parent()
-	while vehicle != null and not vehicle is Vehicle:
-		vehicle = vehicle.get_parent()
+func _recreate_contact_probe() -> void:
+	if _contact_probe != null:
+		remove_child(_contact_probe)
+		_contact_probe.queue_free()
 
-	var cylinder := CylinderShape3D.new()
-	cylinder.height = width
-	cylinder.radius = radius
+	match contact_probe_type:
+		ContactProbeType.RAY_CAST: _contact_probe = RayContactProbe.new()
+		ContactProbeType.CYLINDER_CAST: _contact_probe = CylinderContactProbe.new()
 
-	var query := PhysicsShapeQueryParameters3D.new()
-	if vehicle != null:
-		query.exclude = [vehicle.get_rid()]
-	query.shape = cylinder
-	return query
+	_contact_probe.radius = radius
+	_contact_probe.width = width
+	add_child(_contact_probe, false, Node.INTERNAL_MODE_BACK)
