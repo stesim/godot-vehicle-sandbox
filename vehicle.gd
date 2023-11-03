@@ -102,8 +102,8 @@ func _apply_drive_input(delta : float) -> void:
 					for wheel in axle.get_wheels():
 						feedback_rpm = minf(feedback_rpm, gear_ratio * wheel.get_rpm())
 			motor.rpm_feedback = feedback_rpm
-			motor.update(delta)
 
+		motor.update(delta)
 		torque_output = motor.get_torque_output()
 
 	if transmission != null:
