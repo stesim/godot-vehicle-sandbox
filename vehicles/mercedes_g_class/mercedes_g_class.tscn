@@ -569,6 +569,7 @@ center_of_mass = Vector3(0, 0.5, 0)
 physics_material_override = SubResource("PhysicsMaterial_3l5ve")
 can_sleep = false
 linear_damp_mode = 1
+angular_damp_mode = 1
 script = ExtResource("1_guobo")
 frontal_area = 3.16
 drag_coefficient = 0.533

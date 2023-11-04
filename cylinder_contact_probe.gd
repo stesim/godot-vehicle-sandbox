@@ -33,6 +33,10 @@ func _init() -> void:
 	enabled = false
 	max_results = 4
 
+	radius = radius
+	width = width
+	distance = distance
+
 
 func _ready() -> void:
 	var parent_body := get_parent()

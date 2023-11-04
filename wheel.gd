@@ -6,6 +6,7 @@ enum ContactProbeType {
 	RAY_CAST,
 	MULTI_RAY_CAST,
 	CYLINDER_CAST,
+	RIGID_BODY,
 }
 
 
@@ -286,6 +287,7 @@ func _recreate_contact_probe() -> void:
 		ContactProbeType.RAY_CAST: _contact_probe = RayContactProbe.new()
 		ContactProbeType.MULTI_RAY_CAST: _contact_probe = MultiRayContactProbe.new()
 		ContactProbeType.CYLINDER_CAST: _contact_probe = CylinderContactProbe.new()
+		ContactProbeType.RIGID_BODY: _contact_probe = RigidBodyContactProbe.new()
 
 	_contact_probe.radius = radius
 	_contact_probe.width = width
