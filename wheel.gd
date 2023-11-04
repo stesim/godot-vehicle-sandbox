@@ -4,6 +4,7 @@ extends Node3D
 
 enum ContactProbeType {
 	RAY_CAST,
+	MULTI_RAY_CAST,
 	CYLINDER_CAST,
 }
 
@@ -143,11 +144,10 @@ func apply_suspension_force(vehicle_state : PhysicsDirectBodyState3D, virtual_ma
 		return
 
 	var up := global_transform.basis.y
-	var contact_point : Vector3 = _contact_probe.get_contact_point()
-	var new_suspension_length := (global_position - contact_point).dot(up) - radius
+	var new_suspension_length : float = _contact_probe.get_contact_distance()
 	var suspension_velocity := (new_suspension_length - _suspension_length) / vehicle_state.step
 	_suspension_length = new_suspension_length
-	_contact_velocity = vehicle_state.get_velocity_at_local_position(contact_point - vehicle_state.transform.origin)
+	_contact_velocity = vehicle_state.get_velocity_at_local_position(_contact_probe.get_contact_point() - vehicle_state.transform.origin)
 
 	if suspension == null:
 		_wheel_load = maxf(0.0, -vehicle_state.total_gravity.dot(up)) * virtual_mass
@@ -284,6 +284,7 @@ func _recreate_contact_probe() -> void:
 
 	match contact_probe_type:
 		ContactProbeType.RAY_CAST: _contact_probe = RayContactProbe.new()
+		ContactProbeType.MULTI_RAY_CAST: _contact_probe = MultiRayContactProbe.new()
 		ContactProbeType.CYLINDER_CAST: _contact_probe = CylinderContactProbe.new()
 
 	_contact_probe.radius = radius

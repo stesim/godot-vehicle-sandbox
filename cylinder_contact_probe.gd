@@ -18,6 +18,8 @@ extends ShapeCast3D
 		target_position.x = distance
 
 
+var _contact_distance := 0.0
+
 var _contact_point := Vector3.ZERO
 
 var _contact_normal := Vector3.ZERO
@@ -44,6 +46,10 @@ func is_in_contact() -> bool:
 	return is_colliding()
 
 
+func get_contact_distance() -> float:
+	return _contact_distance
+
+
 func get_contact_point() -> Vector3:
 	return _contact_point
 
@@ -55,25 +61,20 @@ func get_contact_normal() -> Vector3:
 func update() -> void:
 	force_shapecast_update()
 
-	match get_collision_count():
-		0:
-			_contact_point = Vector3.ZERO
-			_contact_normal = Vector3.ZERO
-			return
+	if not is_colliding():
+		_contact_distance = 0.0
+		_contact_point = Vector3.ZERO
+		_contact_normal = Vector3.ZERO
+		return
 
-		1:
-			_contact_point = get_collision_point(0)
-			_contact_normal = get_collision_normal(0)
-
-		var num_collisions:
-			var min_contact_distance := INF
-			for i in num_collisions:
-				var collision_point := get_collision_point(i)
-				var collision_distance := to_local(collision_point).x
-				if collision_distance < min_contact_distance:
-					_contact_point = collision_point
-					_contact_normal = get_collision_normal(i)
-					min_contact_distance = collision_distance
+	_contact_distance = INF
+	for i in get_collision_count():
+		var local_collision_point := to_local(get_collision_point(i))
+		var collision_distance := local_collision_point.x - sqrt(absf(radius * radius - local_collision_point.z * local_collision_point.z))
+		if collision_distance < _contact_distance:
+			_contact_point = get_collision_point(i)
+			_contact_normal = get_collision_normal(i)
+			_contact_distance = collision_distance
 
 	# HACK: move contact point to center of contact patch to avoid lateral drift if the reported
 	#       collision point is, for example, on the right side for all wheels
