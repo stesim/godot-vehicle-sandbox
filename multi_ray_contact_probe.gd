@@ -41,6 +41,10 @@ func _ready() -> void:
 	if parent_body != null:
 		add_exception(parent_body)
 
+	if get_tree().debug_collisions_hint:
+		# debug visualization is only shown when enabled
+		enabled = true
+
 
 func is_in_contact() -> bool:
 	return _is_in_contact
